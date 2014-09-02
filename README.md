@@ -30,7 +30,8 @@ There is 'native' support for the following activation functions. If you define 
 * `ident` the identify function, f(x) = x.
 * `logis` the logistic sigmoid, f(x) = 1 ./(1 .+ exp(-x)).
 * `logissafe` the logistic sigmoid with a 'safe' derivative which doesn't collapse when evaluating large values of x.
-* `relu` rectified linear units , f(x) = log(1 .+ exp(x)).
+* `srelu` soft rectified linear units , f(x) = log(1 .+ exp(x)).
+* `relu` rectified linear units , f(x) = max(0,x).
 * `tanh` hyperbolic tangent as it is already defined in Julia.
 
 ### Training Methods
