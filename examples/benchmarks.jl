@@ -1,5 +1,6 @@
 using DataFrames 
 using MLBase
+using StatsBase
 using NeuralNets
 
 bicycle = readtable("./datasets/BicycleDemand/bicycle_demand.csv") # load test data
@@ -23,31 +24,42 @@ end
 
 X,T = dataprep(bicycle)
 
-X = X[:,1:100:end] # reduce the size of the data set by a factor of 100
-T = T[:,1:100:end]
+X = X[:,1:10:end] # reduce the size of the data set by a factor of 100
+T = T[:,1:10:end]
 
-trans_x = estimate(Standardize, X; center=true, scale=true)
-trans_t = estimate(Standardize, T; center=true, scale=true)
+# feature standardization
+mX = mean(X,2)
+X = X .- mX
+sX = std(X,2)
+X = X ./ sX
 
-transform!(trans_x,X)
-transform!(trans_t,T)
+T = T - mean(T)
+T = T ./ std(T)
 
 ind = size(X,1)
 outd = size(T,1)
 
 layer_sizes = [ind, 6, outd]
-act   = [logis,  ident]
+act   = [relu,  ident]
 
 # not working 100%, it's a difficult set to get to converge in a sensible time period
 
 mlp = MLP(rand, layer_sizes, act)
-params = TrainingParams(100, 1e-5, 2e-6, .7, :levenberg_marquardt)
+#params = TrainingParams(100, 1e-5, 2e-6, .7, :levenberg_marquardt)
 
 O = prop(mlp,X)
 @show mean((O .- T).^2)
 
 println("Training...")
-mlp = train(mlp, params, X, T, verbose=false)
+#mlp = train(mlp, params, X, T, verbose=false)
+mlp1 = train(mlp, X, [], T, [], train_method=:levenberg_marquardt)
 
-O = prop(mlp,X)
+mlp = MLP(rand, layer_sizes, act)
+mlp2 = gdmtrain(mlp, X, T)
+
+mlp = MLP(rand, layer_sizes, act)
+mlp3 = adatrain(mlp, X, T, maxiter=10000)
+
+
+O = prop(mlp3,X)
 @show mean((O .- T).^2)

@@ -21,8 +21,10 @@ mlp = MLP(randn, layer_sizes, act)
 mlp1 = train(mlp, x, [], t, [], train_method=:levenberg_marquardt)
 @show prop(mlp1, x)
 
+mlp = MLP(randn, layer_sizes, act)
 mlp2 = gdmtrain(mlp, x, t)
 @show prop(mlp2, x)
 
+mlp = MLP(randn, layer_sizes, act)
 mlp3 = adatrain(mlp, x, t)
 @show prop(mlp3, x)
