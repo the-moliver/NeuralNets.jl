@@ -43,7 +43,7 @@ Once the MLP type is constructed we train it using one of several provided train
     * `ep_iterl` (default: 5): Performance is evaluated on the validation set every `ep_iter` iterations. A smaller number gives slightly better convergence but each iteration takes a slightly longer time.
     * `verbose` (default: true): Whether or not to print out information on the training state of the network.
 
-* `gdmtrain(nn, x, t)`: This is a natively-implemented gradient descent training algorithm with momentum. Optional parameters include:
+* `gdmtrain(nn, x, t)`: This is a natively-implemented gradient descent training algorithm with Nesterov momentum. Optional parameters include:
     * `batch_size` (default: n): Randomly selected subset of `x` to use when training extremely large data sets. Use this feature for 'stochastic' gradient descent.
     * `maxiter` (default: 1000): Number of iterations before giving up.
     * `tol` (default: 1e-5): Convergence threshold.
