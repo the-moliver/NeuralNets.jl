@@ -27,7 +27,8 @@ function gdmtrain(mlp::MLP,
                   learning_rate=.3,
                   momentum_rate=.6,             
                   eval::Int=10,
-                  verbose::Bool=true)
+                  verbose::Bool=true,
+                  verboseiter::Int=100)
     n = size(x,2)
     η, c, m, b = learning_rate, tol, momentum_rate, batch_size
     i = e_old = Δw_old = 0
@@ -48,7 +49,7 @@ function gdmtrain(mlp::MLP,
             e_new = loss(prop(mlp.net,x),t)
             converged = abs(e_new - e_old) < c # check if converged
         end
-        if verbose && i % 100 == 0
+        if verbose && i % verboseiter == 0
             println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
         end        
     end
@@ -127,7 +128,8 @@ function rmsproptrain(mlp::MLP,
                   learning_rate=.3,
                   momentum_rate=.6,             
                   eval::Int=10,
-                  verbose::Bool=true)
+                  verbose::Bool=true,
+                  verboseiter::Int=100)
     n = size(x,2)
     η, c, m, b = learning_rate, tol, momentum_rate, batch_size
     i = e_old = Δw_old = ∇2 = 0
@@ -139,8 +141,15 @@ function rmsproptrain(mlp::MLP,
         x_batch,t_batch = batch(b,x,t)
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
+        if i==1
+            stepadapt = ones(size(∇))
+        else
+            signsame = sign(∇) .== sign(Δw_old)
+            stepadapt[signsame] *= (1+.01).*stepadapt[signsame]
+            stepadapt[~signsame] *= (1-.01).*stepadapt[~signsame]
+        end
         ∇2 = .1*∇.^2 + .9*∇2       # running estimate of squared gradient
-        Δw_new = -η * ∇ ./  (∇2.^0.5)  # calculate Δ weights   
+        Δw_new = -η .* stepadapt .* ∇ ./  (∇2.^0.5)  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
 
@@ -149,7 +158,7 @@ function rmsproptrain(mlp::MLP,
             e_new = loss(prop(mlp.net,x),t)
             converged = abs(e_new - e_old) < c # check if converged
         end
-        if verbose #&& i % 100 == 0
+        if verbose && i % verboseiter == 0
             println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
         end        
     end

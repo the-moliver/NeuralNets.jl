@@ -30,6 +30,6 @@ mlp3 = adatrain(mlp, x, t)
 @show prop(mlp3, x)
 
 mlp = MLP(randn, layer_sizes, act)
-mlp4 = rmsproptrain(mlp, x, t, learning_rate=.000001)
+mlp4 = rmsproptrain(mlp, x, t, learning_rate=.001, maxiter=1000)
 @show prop(mlp4, x)
 
