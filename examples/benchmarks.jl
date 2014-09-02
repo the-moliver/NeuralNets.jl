@@ -3,6 +3,7 @@ using MLBase
 using StatsBase
 using NeuralNets
 
+cd("C:\\Users\\micha_000\\Documents\\GitHub\\NeuralNets.jl")
 bicycle = readtable("./datasets/BicycleDemand/bicycle_demand.csv") # load test data
 
 function dataprep(data)
@@ -61,7 +62,7 @@ mlp = MLP(rand, layer_sizes, act)
 mlp3 = adatrain(mlp, X, T, maxiter=10000)
 
 mlp = MLP(rand, layer_sizes, act)
-mlp4 = rmproptrain(mlp, X, T, learning_rate=.01)
+mlp4 = rmsproptrain(mlp, X, T, learning_rate=.01, maxiter=20000)
 
 O = prop(mlp3,X)
 @show mean((O .- T).^2)

@@ -140,7 +140,7 @@ function rmsproptrain(mlp::MLP,
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
         ∇2 = .1*∇.^2 + .9*∇2       # running estimate of squared gradient
-        Δw_new = η * ∇ ./  (∇2.^0.5)  # calculate Δ weights   
+        Δw_new = -η * ∇ ./  (∇2.^0.5)  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
 
@@ -149,7 +149,7 @@ function rmsproptrain(mlp::MLP,
             e_new = loss(prop(mlp.net,x),t)
             converged = abs(e_new - e_old) < c # check if converged
         end
-        if verbose && i % 100 == 0
+        if verbose #&& i % 100 == 0
             println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
         end        
     end
