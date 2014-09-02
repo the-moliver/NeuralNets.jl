@@ -37,10 +37,11 @@ function gdmtrain(mlp::MLP,
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
+        mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
-        Δw_new = η*∇ .+ m*Δw_old         # calculate Δ weights   
-        mlp.net = mlp.net .- Δw_new      # update weights                       
-        Δw_old = Δw_new 
+        Δw_new = -η*∇                     # calculate Δ weights   
+        mlp.net = mlp.net .+ Δw_new       # update weights                       
+        Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
 
         if i % eval == 0  # recalculate loss every eval number iterations
             e_old = e_new
