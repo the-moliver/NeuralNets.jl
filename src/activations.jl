@@ -5,8 +5,11 @@ logisd(x) = exp(x) ./ ((1 .+ exp(x)).^2)
 logissafe(x) = logis(x)
 logissafed(x) = logisd(min(x,400.0))
 
-relu(x) = log(1 .+ exp(x))
-relud(x) = 1 ./(1 .+ exp(-x))
+srelu(x) = log(1 .+ exp(x))
+srelud(x) = 1 ./(1 .+ exp(-x))
+
+relu(x) = max(0.,x)
+relud(x) = (x .> 0) + 0.
 
 ident(x) = x
 identd(x) = 1
@@ -17,7 +20,8 @@ tanhd(x) = sech(x).^2
 derivs = Dict{Function, Function}([
                                    logis     => logisd, 
                                    logissafe => logissafed,
-                                   relu      => relud, 
+                                   relu      => relud,
+                                   srelu      => srelud, 
                                    ident     => identd, 
                                    tanh      => tanhd
                                    ])
