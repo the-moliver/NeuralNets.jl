@@ -146,7 +146,7 @@ function rmsproptrain(mlp::MLP,
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
 
         if i > 1
-          stepadapt = stepadapt .* (1+(stepadapt_rate*(sign(∇) + sign(Δw_old) - 1)))  # step size adaptation
+          stepadapt = stepadapt .* (1+(stepadapt_rate.*(sign(-∇) .* sign(Δw_old))))  # step size adaptation
         end
 
         ∇2 = sqgradupdate_rate.*∇.^2 + (1-sqgradupdate_rate).*∇2       # running estimate of squared gradient

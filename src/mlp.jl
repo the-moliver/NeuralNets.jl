@@ -19,7 +19,6 @@ end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
 *(l::NNLayer, x::Array) = l.w*x .+ l.b
-*() = l.w*x .+ l.b
 .*(c::Number, l::NNLayer) = NNLayer(c*l.w, c*l.b, l.a, l.ad)
 .*(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 *(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
@@ -30,13 +29,9 @@ end
 +(l::NNLayer, m::NNLayer) = NNLayer(l.w + m.w, l.b + m.b, l.a, l.ad)
 .+(l::NNLayer, c::Number)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
 .+(c::Number, l::NNLayer)  = l .+ c
-#eq(l::NNLayer, m::NNLayer) = NNLayer(eq(l.w,m.w), eq(l.b,m.b), l.a, l.ad)
-#eq(l::Array, x::Array) = eq(l,x)
-#eq(l::Float64, c::Float64)= l == c;
+
 import Base.sign
 sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
-import Base.abs
-abs(l::NNLayer) = NNLayer(abs(l.w), abs(l.b), l.a, l.ad)
 
 function Base.show(io::IO, l::NNLayer)
     print(io, summary(l),":\n")
