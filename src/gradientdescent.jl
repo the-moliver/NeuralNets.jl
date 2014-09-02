@@ -126,7 +126,9 @@ function rmsproptrain(mlp::MLP,
                   maxiter::Int=1000,
                   tol::Real=1e-5,
                   learning_rate=.3,
-                  momentum_rate=.6,             
+                  momentum_rate=.6,
+                  stepadapt_rate=.001,
+                  sqgradupdate_rate=.1,             
                   eval::Int=10,
                   verbose::Bool=true,
                   verboseiter::Int=100)
@@ -144,10 +146,10 @@ function rmsproptrain(mlp::MLP,
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
 
         if i > 1
-          stepadapt = stepadapt .* (1+(.01*(sign(∇) + sign(Δw_old) - 1)))
+          stepadapt = stepadapt .* (1+(stepadapt_rate*(sign(∇) + sign(Δw_old) - 1)))  # step size adaptation
         end
-        
-        ∇2 = .1*∇.^2 + .9*∇2       # running estimate of squared gradient
+
+        ∇2 = sqgradupdate_rate.*∇.^2 + (1-sqgradupdate_rate).*∇2       # running estimate of squared gradient
         Δw_new = -η .* stepadapt .* ∇ ./  (∇2.^0.5)  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
