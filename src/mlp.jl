@@ -31,6 +31,9 @@ end
 .+(l::NNLayer, c::Number)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
 .+(c::Number, l::NNLayer)  = l .+ c
 
+import Base.sign
+sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
+
 function Base.show(io::IO, l::NNLayer)
     print(io, summary(l),":\n")
     print(io, "activation functions:\n")

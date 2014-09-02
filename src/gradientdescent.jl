@@ -133,6 +133,7 @@ function rmsproptrain(mlp::MLP,
     n = size(x,2)
     η, c, m, b = learning_rate, tol, momentum_rate, batch_size
     i = e_old = Δw_old = ∇2 = 0
+    stepadapt = 0.0 .* mlp.net + 1.0
     e_new = loss(prop(mlp.net,x),t)
     converged::Bool = false
 
@@ -141,13 +142,11 @@ function rmsproptrain(mlp::MLP,
         x_batch,t_batch = batch(b,x,t)
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
-        if i==1
-            stepadapt = ones(size(∇))
-        else
-            signsame = sign(∇) .== sign(Δw_old)
-            stepadapt[signsame] *= (1+.01).*stepadapt[signsame]
-            stepadapt[~signsame] *= (1-.01).*stepadapt[~signsame]
+
+        if i > 1
+          stepadapt = stepadapt .* (1+(.01*(sign(∇) + sign(Δw_old) - 1)))
         end
+        
         ∇2 = .1*∇.^2 + .9*∇2       # running estimate of squared gradient
         Δw_new = -η .* stepadapt .* ∇ ./  (∇2.^0.5)  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
