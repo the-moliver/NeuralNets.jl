@@ -6,7 +6,7 @@ using ArrayViews
 import Optim:levenberg_marquardt
 
 # functions
-export train, gdmtrain, adatrain, prop
+export train, gdmtrain, adatrain, prop, rmsproptrain
 export logis, logisd, logissafe, logissafed, relu, relud, srelu, srelud, ident, identd, tanhd
 
 # types

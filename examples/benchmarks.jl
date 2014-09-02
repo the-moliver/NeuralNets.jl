@@ -24,8 +24,8 @@ end
 
 X,T = dataprep(bicycle)
 
-X = X[:,1:10:end] # reduce the size of the data set by a factor of 100
-T = T[:,1:10:end]
+X = X[:,1:100:end] # reduce the size of the data set by a factor of 100
+T = T[:,1:100:end]
 
 # feature standardization
 mX = mean(X,2)
@@ -55,11 +55,13 @@ println("Training...")
 mlp1 = train(mlp, X, [], T, [], train_method=:levenberg_marquardt)
 
 mlp = MLP(rand, layer_sizes, act)
-mlp2 = gdmtrain(mlp, X, T)
+mlp2 = gdmtrain(mlp, X, T, learning_rate=.0005, maxiter=20000)
 
 mlp = MLP(rand, layer_sizes, act)
 mlp3 = adatrain(mlp, X, T, maxiter=10000)
 
+mlp = MLP(rand, layer_sizes, act)
+mlp4 = rmproptrain(mlp, X, T, learning_rate=.01)
 
 O = prop(mlp3,X)
 @show mean((O .- T).^2)

@@ -28,3 +28,7 @@ mlp2 = gdmtrain(mlp, x, t)
 mlp = MLP(randn, layer_sizes, act)
 mlp3 = adatrain(mlp, x, t)
 @show prop(mlp3, x)
+
+mlp = MLP(randn, layer_sizes, act)
+mlp4 = rmsproptrain(mlp, x, t)
+@show prop(mlp4, x)
