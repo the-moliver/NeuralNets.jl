@@ -137,7 +137,7 @@ function rmsproptrain(mlp::MLP,
     n = size(x,2)
     η, c, m, b = learning_rate, tol, momentum_rate, batch_size
     i = e_old = Δw_old = ∇2 = 0
-    stepadapt = 0.0 .* mlp.net + 1.0
+    stepadapt = mlp.net.^0.0
     e_new = loss(prop(mlp.net,x),t)
     converged::Bool = false
 
