@@ -18,25 +18,25 @@ type MLP
 end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
-#*(l::NNLayer, x::Array) = l.w*x .+ l.b
-.*(c::Float64, l::NNLayer) = NNLayer(c.*l.w, c.*l.b, l.a, l.ad)
-.*(l::NNLayer, c::Float64) = NNLayer(l.w.*c, l.b.*c, l.a, l.ad)
+*(l::NNLayer, x::Array{FloatingPoint}) = l.w*x .+ l.b
+.*(c::FloatingPoint, l::NNLayer) = NNLayer(c.*l.w, c.*l.b, l.a, l.ad)
+.*(l::NNLayer, c::FloatingPoint) = NNLayer(l.w.*c, l.b.*c, l.a, l.ad)
 .*(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 *(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 /(l::NNLayer, m::NNLayer) = NNLayer(l.w./m.w, l.b./m.b, l.a, l.ad)
-^(l::NNLayer, c::Float64) = NNLayer(l.w.^c, l.b.^c, l.a, l.ad)
+^(l::NNLayer, c::FloatingPoint) = NNLayer(l.w.^c, l.b.^c, l.a, l.ad)
 -(l::NNLayer, m::NNLayer) = NNLayer(l.w .- m.w, l.b .- m.b, l.a, l.ad)
-.-(l::NNLayer, c::Float64)  = NNLayer(l.w .- c, l.b .- c, l.a, l.ad)
-.-(c::Float64, l::NNLayer)  = NNLayer(c .- l.w, c .- l.b, l.a, l.ad)
+.-(l::NNLayer, c::FloatingPoint)  = NNLayer(l.w .- c, l.b .- c, l.a, l.ad)
+.-(c::FloatingPoint, l::NNLayer)  = NNLayer(c .- l.w, c .- l.b, l.a, l.ad)
 +(l::NNLayer, m::NNLayer) = NNLayer(l.w + m.w, l.b + m.b, l.a, l.ad)
-.+(l::NNLayer, c::Float64)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
-.+(c::Float64, l::NNLayer)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
+.+(l::NNLayer, c::FloatingPoint)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
+.+(c::FloatingPoint, l::NNLayer)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
 
 
 import Base.sign
 sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
 
-function Base.min(net::Array{NNLayer}, c::Float64)
+function Base.min(net::Array{NNLayer}, c::FloatingPoint)
     for l in net
     	l.w = min(l.w,c)
         l.b = min(l.b,c)
@@ -44,7 +44,7 @@ function Base.min(net::Array{NNLayer}, c::Float64)
     net
 end
 
-function Base.max(net::Array{NNLayer}, c::Float64)
+function Base.max(net::Array{NNLayer}, c::FloatingPoint)
     for l in net
     	l.w = max(l.w,c)
         l.b = max(l.b,c)
