@@ -154,10 +154,10 @@ function rmsproptrain(mlp::MLP,
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
         end
 
-        ∇2 = sqgradupdate_rate.*∇.^2 + (1.0 -sqgradupdate_rate).*∇2       # running estimate of squared gradient
+        ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2       # running estimate of squared gradient
         Δw_new = -η .* stepadapt .* ∇ ./  (∇2.^0.5)  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
-        Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
+        Δw_old = Δw_new .+ m.*Δw_old       # keep track of all weight updates
 
         if i % eval == 0  # recalculate loss every eval number iterations
             e_old = e_new
