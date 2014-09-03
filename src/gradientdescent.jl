@@ -129,7 +129,7 @@ function rmsproptrain(mlp::MLP,
                   momentum_rate=.6,
                   stepadapt_rate=.01,
                   minadapt=.5,
-                  maxadapt=5,
+                  maxadapt=5.0,
                   sqgradupdate_rate=.1,             
                   eval::Int=10,
                   verbose::Bool=true,
@@ -148,9 +148,6 @@ function rmsproptrain(mlp::MLP,
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
         if i > 1
           stepadapt = stepadapt .* (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
-          print(typeof(sign(∇)))
-          print(typeof(Δw_old))
-          print(typeof(stepadapt))
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
         end
 
