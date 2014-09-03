@@ -25,14 +25,56 @@ end
 *(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 /(l::NNLayer, m::NNLayer) = NNLayer(l.w./m.w, l.b./m.b, l.a, l.ad)
 ^(l::NNLayer, c::FloatingPoint) = NNLayer(l.w.^c, l.b.^c, l.a, l.ad)
--(l::NNLayer, m::NNLayer) = NNLayer{Float64}(l.w .- m.w, l.b .- m.b, l.a, l.ad)
-.-(l::NNLayer, c::FloatingPoint)  = NNLayer{Float64}(l.w .- c, l.b .- c, l.a, l.ad)
-.-(c::FloatingPoint, l::NNLayer)  = NNLayer{Float64}(c .- l.w, c .- l.b, l.a, l.ad)
-+(l::NNLayer, m::NNLayer) = NNLayer{Float64}(l.w + m.w, l.b + m.b, l.a, l.ad)
-.+(l::NNLayer, c::FloatingPoint)  = NNLayer{Float64}(l.w .+ c, l.b .+ c, l.a, l.ad)
-.+(c::FloatingPoint, l::NNLayer)  = NNLayer{Float64}(l.w .+ c, l.b .+ c, l.a, l.ad)
+-(l::NNLayer, m::NNLayer) = NNLayer(l.w .- m.w, l.b .- m.b, l.a, l.ad)
+.-(l::NNLayer, c::FloatingPoint)  = NNLayer(l.w .- c, l.b .- c, l.a, l.ad)
+.-(c::FloatingPoint, l::NNLayer)  = NNLayer(c .- l.w, c .- l.b, l.a, l.ad)
++(l::NNLayer, m::NNLayer) = NNLayer(l.w + m.w, l.b + m.b, l.a, l.ad)
+.+(l::NNLayer, c::FloatingPoint)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
+.+(c::FloatingPoint, l::NNLayer)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
 
 
+.*(net::Array{NNLayer}, c::FloatingPoint)  =  begin
+												for l in net
+											    	l.w = l.w .* c
+											        l.b = l.b .* c
+											    end
+											    net
+											end
+.*(c::FloatingPoint, net::Array{NNLayer})  =  begin
+												for l in net
+											    	l.w = c.* l.w
+											        l.b = c.*l.b
+											    end
+											    net
+											end
+.+(net::Array{NNLayer}, c::FloatingPoint)  =  begin
+												for l in net
+											    	l.w = l.w .+ c
+											        l.b = l.b .+ c
+											    end
+											    net
+											end
+.+(c::FloatingPoint,net::Array{NNLayer})  =  begin
+												for l in net
+											    	l.w = l.w .+ c
+											        l.b = l.b .+ c
+											    end
+											    net
+											end											
+.-(net::Array{NNLayer}, c::FloatingPoint)  =  begin
+												for l in net
+											    	l.w = l.w .- c
+											        l.b = l.b .- c
+											    end
+											    net
+											end
+.-(c::FloatingPoint, net::Array{NNLayer})  =  begin
+												for l in net
+											    	l.w = c .- l.w
+											        l.b = c .- l.b
+											    end
+											    net
+											end											
 import Base.sign
 sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
 

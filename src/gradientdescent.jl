@@ -82,7 +82,7 @@ function adatrain(mlp::MLP,
                   verbose::Bool=true)
 
     η, c, λ, b = learning_rate, tol, lambda, batch_size
-    i = e_old = Δnet = sumgrad = 0
+    i = e_old = Δnet = sumgrad = 0.0
     e_new = loss(prop(mlp.net,x),t)
     n = size(x,2)
     converged::Bool = false
