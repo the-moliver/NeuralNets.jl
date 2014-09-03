@@ -1,19 +1,12 @@
 # NeuralNets.jl
 An open-ended implentation of artificial neural networks in Julia.
 
-Some neat features include:
-* Poised to deliver cutting-edge synergy for your business or housecat in real-time!
-* Twitter-ready out of the box!
-* Both HAL9000 and Skynet proof!
-* Low calorie, 100% vegan, and homeopathic friendly!
-* Excellent source of vitamin Q!
-
-Some less exciting features:
+Some features:
 * Flexible network topology with any combination of activation function/layer number.
 * Support for a number of common node activation functions in addition to support for arbitrary activation functions with the use of automatic differentiation.
 * A broad range of training algorithms to chose from.
 
-Over time we hope to develop this library to encompass more modern types of neural networks, namely deep belief networks.
+The next big thing is to finish implementing DropOut and add the option to use time delays.
 
 ## Usage
 Currently we only have support for multi-layer perceptrons, these are instantiated by using the `MLP(genf,layer_sizes,act)` constructor  to describe the network topology and initialisation procedure as follows:
@@ -44,6 +37,15 @@ Once the MLP type is constructed we train it using one of several provided train
     * `verbose` (default: true): Whether or not to print out information on the training state of the network.
 
 * `gdmtrain(nn, x, t)`: This is a natively-implemented gradient descent training algorithm with Nesterov momentum. Optional parameters include:
+    * `batch_size` (default: n): Randomly selected subset of `x` to use when training extremely large data sets. Use this feature for 'stochastic' gradient descent.
+    * `maxiter` (default: 1000): Number of iterations before giving up.
+    * `tol` (default: 1e-5): Convergence threshold.
+    * `learning_rate` (default: .3): Learning rate of gradient descent. While larger values may converge faster, using values that are too large may result in lack of convergence (you can typically see this happening with weights going to infinity and getting lots of NaNs). It's suggested to start from a small value and increase if it improves learning.
+    * `momentum_rate` (default: .6): Amount of momentum to apply. Try 0 for no momentum.
+    * `eval` (default: 10): The network is evaluated for convergence every `eval` iterations. A smaller number gives slightly better convergence but each iteration takes a slightly longer time.
+    * `verbose` (default: true): Whether or not to print out information on the training state of the network.
+    * 
+* `rmsproptrain(nn, x, t)`: This is a natively-implemented RMSProp training algorithm with Nesterov momentum. Optional parameters include:
     * `batch_size` (default: n): Randomly selected subset of `x` to use when training extremely large data sets. Use this feature for 'stochastic' gradient descent.
     * `maxiter` (default: 1000): Number of iterations before giving up.
     * `tol` (default: 1e-5): Convergence threshold.
