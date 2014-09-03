@@ -147,12 +147,12 @@ function rmsproptrain(mlp::MLP,
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
         if i > 1
-          stepadapt = stepadapt .* (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
+          stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
         end
 
         ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2       # running estimate of squared gradient
-        Δw_new = -η .* stepadapt .* ∇ ./  (∇2.^0.5)  # calculate Δ weights   
+        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m.*Δw_old       # keep track of all weight updates
 
