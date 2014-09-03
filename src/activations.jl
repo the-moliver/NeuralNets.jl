@@ -26,6 +26,7 @@ function donrelu(x)
 	idx = randperm(size(a,1))
 	a[idx[1:(.5*length(idx))],:] = 0.
 	a[idx[(.5*length(idx)+1):end],:] = 2.0.*a[idx[(.5*length(idx)+1):end],:]
+	a
 end
 
 donrelud(x) = (x .> 0) + 0.
