@@ -126,6 +126,7 @@ function rmsproptrain(mlp::MLP,
                   maxiter::Int=1000,
                   tol::Real=1e-5,
                   learning_rate=.3,
+                  learning_rate_factor=.999,
                   momentum_rate=.6,
                   stepadapt_rate=.01,
                   minadapt=.5,
@@ -149,6 +150,7 @@ function rmsproptrain(mlp::MLP,
         if i > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
+          η .*= learning_rate_factor
         end
 
         ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2       # running estimate of squared gradient
