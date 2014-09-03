@@ -64,9 +64,9 @@ function backprop{T}(net::Vector{T}, x, t)
         y = l.a(h)
         grad,δ = backprop(net[2:end], y, t)
         δ = l.ad(h) .* δ
-        if isnan(δ)
-        	print(δ)
-        end
+
+        print(δ)
+        
         unshift!(grad,NNLayer(δ*x',vec(sum(δ,2)),exp,exp))  # Weight gradient
         δ = l.w' * δ
     end
