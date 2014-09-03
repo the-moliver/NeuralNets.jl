@@ -90,7 +90,7 @@ function adatrain(mlp::MLP,
         i += 1
         x_batch,t_batch = batch(b,x,t)
         ∇,δ = backprop(mlp.net,x_batch,t_batch)
-        sumgrad += ∇ .^ 2       # store sum of squared past gradients
+        sumgrad += ∇ .^ 2.       # store sum of squared past gradients
         Δw = η * ∇ ./ (λ .+ (sumgrad .^ 0.5))   # calculate Δ weights
         mlp.net = mlp.net .- Δw                 # update weights
 

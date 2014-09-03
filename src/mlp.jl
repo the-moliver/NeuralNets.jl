@@ -18,19 +18,19 @@ type MLP
 end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
-*(l::NNLayer, x::Array{FloatingPoint}) = l.w*x .+ l.b
+*(l::NNLayer, x::Array{Float64}) = l.w*x .+ l.b
 .*(c::FloatingPoint, l::NNLayer) = NNLayer(c.*l.w, c.*l.b, l.a, l.ad)
 .*(l::NNLayer, c::FloatingPoint) = NNLayer(l.w.*c, l.b.*c, l.a, l.ad)
 .*(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 *(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 /(l::NNLayer, m::NNLayer) = NNLayer(l.w./m.w, l.b./m.b, l.a, l.ad)
 ^(l::NNLayer, c::FloatingPoint) = NNLayer(l.w.^c, l.b.^c, l.a, l.ad)
--(l::NNLayer, m::NNLayer) = NNLayer(l.w .- m.w, l.b .- m.b, l.a, l.ad)
-.-(l::NNLayer, c::FloatingPoint)  = NNLayer(l.w .- c, l.b .- c, l.a, l.ad)
-.-(c::FloatingPoint, l::NNLayer)  = NNLayer(c .- l.w, c .- l.b, l.a, l.ad)
-+(l::NNLayer, m::NNLayer) = NNLayer(l.w + m.w, l.b + m.b, l.a, l.ad)
-.+(l::NNLayer, c::FloatingPoint)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
-.+(c::FloatingPoint, l::NNLayer)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
+-(l::NNLayer, m::NNLayer) = NNLayer{Float64}(l.w .- m.w, l.b .- m.b, l.a, l.ad)
+.-(l::NNLayer, c::FloatingPoint)  = NNLayer{Float64}(l.w .- c, l.b .- c, l.a, l.ad)
+.-(c::FloatingPoint, l::NNLayer)  = NNLayer{Float64}(c .- l.w, c .- l.b, l.a, l.ad)
++(l::NNLayer, m::NNLayer) = NNLayer{Float64}(l.w + m.w, l.b + m.b, l.a, l.ad)
+.+(l::NNLayer, c::FloatingPoint)  = NNLayer{Float64}(l.w .+ c, l.b .+ c, l.a, l.ad)
+.+(c::FloatingPoint, l::NNLayer)  = NNLayer{Float64}(l.w .+ c, l.b .+ c, l.a, l.ad)
 
 
 import Base.sign
