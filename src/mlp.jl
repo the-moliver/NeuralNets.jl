@@ -35,6 +35,22 @@ end
 import Base.sign
 sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
 
+function Base.min(net::Array{NNLayer}, c::Number)
+    for l in net
+    	l.w = min(l.w,c)
+        l.b = min(l.b,c)
+    end
+    net
+end
+
+function Base.max(net::Array{NNLayer}, c::Number)
+    for l in net
+    	l.w = max(l.w,c)
+        l.b = max(l.b,c)
+    end
+    net
+end
+
 function Base.show(io::IO, l::NNLayer)
     print(io, summary(l),":\n")
     print(io, "activation functions:\n")
