@@ -170,5 +170,6 @@ function rmsproptrain(mlp::MLP,
     println("* learning rate η = $η")
     println("* momentum coefficient m = $m")
     println("* convergence criterion c = $c")
+    mlp.trained=true
     return mlp
 end

@@ -11,6 +11,14 @@ srelud(x) = 1 ./(1 .+ exp(-x))
 relu(x) = max(0.,x)
 relud(x) = (x .> 0) + 0.
 
+function nrelu(x) 
+	a = max(0.,x)
+	a += sqrt(a).*randn(size(a))
+	a = max(0.,a)
+end
+
+nrelud(x) = (x .> 0) + 0.
+
 ident(x) = x
 identd(x) = 1
 
@@ -21,7 +29,8 @@ derivs = Dict{Function, Function}([
                                    logis     => logisd, 
                                    logissafe => logissafed,
                                    relu      => relud,
-                                   srelu      => srelud, 
+                                   srelu      => srelud,
+                                   nrelu      => nrelud, 
                                    ident     => identd, 
                                    tanh      => tanhd
                                    ])
