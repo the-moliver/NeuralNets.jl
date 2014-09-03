@@ -34,46 +34,68 @@ end
 
 
 .*(net::Array{NNLayer}, c::FloatingPoint)  =  begin
-												for l in net
+												net2=deepcopy(net)
+												for l in net2
 											    	l.w = l.w .* c
 											        l.b = l.b .* c
 											    end
-											    net
+											    net2
 											end
 .*(c::FloatingPoint, net::Array{NNLayer})  =  begin
-												for l in net
+												net2=deepcopy(net)
+												for l in net2
 											    	l.w = c.* l.w
 											        l.b = c.*l.b
 											    end
-											    net
+											    net2
+											end
+./(net::Array{NNLayer}, c::FloatingPoint)  =  begin
+												net2=deepcopy(net)
+												for l in net2
+											    	l.w = l.w ./ c
+											        l.b = l.b ./ c
+											    end
+											    net2
+											end
+./(c::FloatingPoint, net::Array{NNLayer})  =  begin
+												net2=deepcopy(net)
+												for l in net2
+											    	l.w = c./ l.w
+											        l.b = c./l.b
+											    end
+											    net2
 											end
 .+(net::Array{NNLayer}, c::FloatingPoint)  =  begin
-												for l in net
+												net2=deepcopy(net)
+												for l in net2
 											    	l.w = l.w .+ c
 											        l.b = l.b .+ c
 											    end
-											    net
+											    net2
 											end
 .+(c::FloatingPoint,net::Array{NNLayer})  =  begin
-												for l in net
+												net2=deepcopy(net)
+												for l in net2
 											    	l.w = l.w .+ c
 											        l.b = l.b .+ c
 											    end
-											    net
+											    net2
 											end											
 .-(net::Array{NNLayer}, c::FloatingPoint)  =  begin
-												for l in net
+												net2=deepcopy(net)
+												for l in net2
 											    	l.w = l.w .- c
 											        l.b = l.b .- c
 											    end
-											    net
+											    net2
 											end
 .-(c::FloatingPoint, net::Array{NNLayer})  =  begin
-												for l in net
+												net2=deepcopy(net)
+												for l in net2
 											    	l.w = c .- l.w
 											        l.b = c .- l.b
 											    end
-											    net
+											    net2
 											end											
 import Base.sign
 sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
