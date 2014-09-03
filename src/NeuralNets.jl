@@ -7,7 +7,7 @@ import Optim:levenberg_marquardt
 
 # functions
 export train, gdmtrain, adatrain, prop, rmsproptrain
-export logis, logisd, logissafe, logissafed, relu, relud, srelu, srelud, nrelu, nrelud, ident, identd, tanhd
+export logis, logisd, logissafe, logissafed, relu, relud, srelu, srelud, nrelu, nrelud, donrelu, donrelud, ident, identd, tanhd
 
 # types
 export MLP, NNLayer

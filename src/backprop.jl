@@ -9,7 +9,7 @@ end
 function prop(mlp::MLP,x)
 	if mlp.trained
 		for l in mlp.net
-			if l.a == nrelu
+			if l.a == nrelu || l.a == donrelu
 				l.a = relu
 			end
 		end

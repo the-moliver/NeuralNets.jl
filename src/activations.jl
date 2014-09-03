@@ -19,6 +19,17 @@ end
 
 nrelud(x) = (x .> 0) + 0.
 
+function donrelu(x) 
+	a = max(0.,x)
+	a += sqrt(a).*randn(size(a))
+	a = max(0.,a)
+	idx = randperm(size(a,1))
+	a[idx[1:(.5*length(idx))],:] = 0.
+	a[idx[(.5*length(idx)+1):end],:] = 2.0.*a[idx[(.5*length(idx)+1):end],:]
+end
+
+donrelud(x) = (x .> 0) + 0.
+
 ident(x) = x
 identd(x) = 1
 
@@ -29,8 +40,9 @@ derivs = Dict{Function, Function}([
                                    logis     => logisd, 
                                    logissafe => logissafed,
                                    relu      => relud,
-                                   srelu      => srelud,
-                                   nrelu      => nrelud, 
+                                   donrelu   => donrelud,
+                                   srelu     => srelud,
+                                   nrelu     => nrelud, 
                                    ident     => identd, 
                                    tanh      => tanhd
                                    ])
