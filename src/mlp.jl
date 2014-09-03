@@ -19,17 +19,17 @@ end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
 *(l::NNLayer, x::Array) = l.w*x .+ l.b
-.*(c::Number, l::NNLayer) = NNLayer(c*l.w, c*l.b, l.a, l.ad)
+.*(c::Float64, l::NNLayer) = NNLayer(c*l.w, c*l.b, l.a, l.ad)
 .*(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 *(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 /(l::NNLayer, m::NNLayer) = NNLayer(l.w./m.w, l.b./m.b, l.a, l.ad)
 ^(l::NNLayer, c::Float64) = NNLayer(l.w.^c, l.b.^c, l.a, l.ad)
 -(l::NNLayer, m::NNLayer) = NNLayer(l.w .- m.w, l.b .- m.b, l.a, l.ad)
-.-(l::NNLayer, c::Number)  = NNLayer(l.w .- c, l.b .- c, l.a, l.ad)
-.-(c::Number, l::NNLayer)  = NNLayer(c .- l.w, c .- l.b, l.a, l.ad)
+.-(l::NNLayer, c::Float64)  = NNLayer(l.w .- c, l.b .- c, l.a, l.ad)
+.-(c::Float64, l::NNLayer)  = NNLayer(c .- l.w, c .- l.b, l.a, l.ad)
 +(l::NNLayer, m::NNLayer) = NNLayer(l.w + m.w, l.b + m.b, l.a, l.ad)
-.+(l::NNLayer, c::Number)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
-.+(c::Number, l::NNLayer)  = l .+ c
+.+(l::NNLayer, c::Float64)  = NNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
+.+(c::Float64, l::NNLayer)  = l .+ c
 
 
 import Base.sign
