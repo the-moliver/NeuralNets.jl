@@ -6,7 +6,16 @@ function prop(net, x)
 	end
 end
 
-prop(mlp::MLP,x) = prop(mlp.net,x)
+function prop(mlp::MLP,x)
+	if mlp.trained
+		for l in mlp.net
+			if l.a == nrelu
+				l.a = relu
+			end
+		end
+	end
+	prop(mlp.net,x)
+end
 
 # add some 'missing' functionality to ArrayViews
 function setindex!{T}(dst::ContiguousView, src::Array{T}, idx::UnitRange)
