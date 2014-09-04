@@ -197,13 +197,20 @@ function rmsproptrain(mlp::MLP,
             println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
         end        
     end
+
+    if verbose
+      e_old = e_new
+      e_new = loss(prop(mlp.net,x),t)
+      println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
+    end    
+
   end
 
   #convgstr = converged ? "converged" : "didn't converge"
   println("Training finished in $epoch epochs; average error: $(round((e_new/n),4)).")
   println("* learning rate η = $η")
   println("* momentum coefficient m = $m")
-  println("* convergence criterion c = $c")
+  #println("* convergence criterion c = $c")
   mlp.trained=true
   return mlp
 end
