@@ -27,6 +27,7 @@ function gdmtrain(mlp::MLP,
                   learning_rate=.3,
                   momentum_rate=.6,             
                   eval::Int=10,
+                  loss=squared_loss,
                   verbose::Bool=true,
                   verboseiter::Int=100)
     n = size(x,2)
@@ -35,11 +36,13 @@ function gdmtrain(mlp::MLP,
     e_new = loss(prop(mlp.net,x),t)
     converged::Bool = false
 
+    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(lossderivs)
+
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
         Δw_new = -η*∇                     # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
@@ -78,6 +81,7 @@ function adatrain(mlp::MLP,
                   tol::Real=1e-5,
                   learning_rate=.3,
                   lambda=1e-6,
+                  loss=squared_loss,
                   eval::Int=10,
                   verbose::Bool=true)
 
@@ -86,10 +90,13 @@ function adatrain(mlp::MLP,
     e_new = loss(prop(mlp.net,x),t)
     n = size(x,2)
     converged::Bool = false
+
+    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(lossderivs)
+
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
-        ∇,δ = backprop(mlp.net,x_batch,t_batch)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
         sumgrad += ∇ .^ 2.       # store sum of squared past gradients
         Δw = η * ∇ ./ (λ .+ (sumgrad .^ 0.5))   # calculate Δ weights
         mlp.net = mlp.net .- Δw                 # update weights
