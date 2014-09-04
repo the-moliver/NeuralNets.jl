@@ -2,7 +2,16 @@
 
 using ArrayViews
 
-type NNLayer{T}
+abstract Layer{T}
+
+type NNLayer{T} <: Layer{T}
+    w::AbstractMatrix{T}
+    b::AbstractVector{T}
+    a::Function
+    ad::Function
+end
+
+type TDNNLayer{T} <: NNLayer{T}
     w::AbstractMatrix{T}
     b::AbstractVector{T}
     a::Function
@@ -10,7 +19,7 @@ type NNLayer{T}
 end
 
 type MLP
-    net::Vector{NNLayer}
+    net::Vector{Layer}
     dims::Vector{(Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
