@@ -130,37 +130,54 @@ function rmsproptrain(mlp::MLP,
                   x,
                   t;
                   batch_size=size(x,2),
-                  maxiter::Int=1000,
-                  tol::Real=1e-5,
-                  learning_rate=.3,
-                  learning_rate_factor=.999,
-                  momentum_rate=.6,
-                  stepadapt_rate=.01,
-                  minadapt=.5,
-                  maxadapt=5.0,
-                  sqgradupdate_rate=.1,
+                  maxiter::Int=100,
+                  tol::::Float64=1e-5,
+                  learning_rate::Float64=.3,
+                  learning_rate_factor::Float64=.999,
+                  momentum_rate::Float64=.6,
+                  stepadapt_rate::Float64=.01,
+                  minadapt::Float64=.5,
+                  maxadapt::Float64=5.0,
+                  sqgradupdate_rate::Float64=.1,
                   loss=squared_loss,            
-                  eval::Int=10,
                   verbose::Bool=true,
                   verboseiter::Int=100)
-    n = size(x,2)
-    η, c, m, b = learning_rate, tol, momentum_rate, batch_size
-    i = e_old = Δw_old = 0
-    stepadapt = ∇2 = mlp.net.^0.0
-    e_new = loss(prop(mlp.net,x),t)
-    converged::Bool = false
+  n = size(x,2)
+  η, c, m, b = learning_rate, tol, momentum_rate, batch_size
+  e_old = Δw_old = epoch = 0
+  stepadapt = ∇2 = mlp.net.^0.0
+  e_new = loss(prop(mlp.net,x),t)
+  converged::Bool = false
 
-    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+  lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
 
-    while (!converged && i < maxiter)
+    
+  while epoch < maxiter
+    epoch += 1
+    fitpoints = 1:size(x,2)
+
+    numtoadd = batch_size - length(fitpoints)%batch_size
+    push!(fitpoints, sample(fitpoints,numtoadd))
+    numfitpoints = length(fitpoints)
+
+    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, numfitpoints/batch_size);
+
+    if epoch > 1
+      η .*= learning_rate_factor
+    end
+
+    i = 0
+
+    while i < size(fitpoints,2)
         i += 1
-        x_batch,t_batch = batch(b,x,t)
+        #x_batch,t_batch = batch(b,x,t)
+        x_batch = x[:,fitpoints[:,i]]
+        t_batch = t[:,fitpoints[:,i]]
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
-        if i > 1
+        ∇ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
+        if i > 1 || epoch > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
-          η .*= learning_rate_factor
         end
 
         ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2       # running estimate of squared gradient
@@ -168,20 +185,24 @@ function rmsproptrain(mlp::MLP,
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m.*Δw_old       # keep track of all weight updates
 
-        if i % eval == 0  # recalculate loss every eval number iterations
+        #if i % eval == 0  # recalculate loss every eval number iterations
+        #    e_old = e_new
+        #    e_new = loss(prop(mlp.net,x),t)
+        #    converged = abs(e_new - e_old) < c # check if converged
+        #end
+        if verbose && i % verboseiter == 0
             e_old = e_new
             e_new = loss(prop(mlp.net,x),t)
-            converged = abs(e_new - e_old) < c # check if converged
-        end
-        if verbose && i % verboseiter == 0
             println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
         end        
     end
-    convgstr = converged ? "converged" : "didn't converge"
-    println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
-    println("* learning rate η = $η")
-    println("* momentum coefficient m = $m")
-    println("* convergence criterion c = $c")
-    mlp.trained=true
-    return mlp
+  end
+
+  #convgstr = converged ? "converged" : "didn't converge"
+  println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
+  println("* learning rate η = $η")
+  println("* momentum coefficient m = $m")
+  println("* convergence criterion c = $c")
+  mlp.trained=true
+  return mlp
 end
