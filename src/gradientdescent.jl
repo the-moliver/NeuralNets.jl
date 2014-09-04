@@ -131,7 +131,6 @@ function rmsproptrain(mlp::MLP,
                   t;
                   batch_size=size(x,2),
                   maxiter::Int=100,
-                  tol::::Float64=1e-5,
                   learning_rate::Float64=.3,
                   learning_rate_factor::Float64=.999,
                   momentum_rate::Float64=.6,
@@ -143,7 +142,7 @@ function rmsproptrain(mlp::MLP,
                   verbose::Bool=true,
                   verboseiter::Int=100)
   n = size(x,2)
-  η, c, m, b = learning_rate, tol, momentum_rate, batch_size
+  η, m, b = learning_rate, momentum_rate, batch_size
   e_old = Δw_old = epoch = 0
   stepadapt = ∇2 = mlp.net.^0.0
   e_new = loss(prop(mlp.net,x),t)
@@ -199,7 +198,7 @@ function rmsproptrain(mlp::MLP,
   end
 
   #convgstr = converged ? "converged" : "didn't converge"
-  println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
+  println("Training finished in $epoch epochs; average error: $(round((e_new/n),4)).")
   println("* learning rate η = $η")
   println("* momentum coefficient m = $m")
   println("* convergence criterion c = $c")
