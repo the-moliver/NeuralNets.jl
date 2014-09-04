@@ -36,7 +36,7 @@ function gdmtrain(mlp::MLP,
     e_new = loss(prop(mlp.net,x),t)
     converged::Bool = false
 
-    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(lossderivs)
+    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
 
     while (!converged && i < maxiter)
         i += 1
@@ -91,7 +91,7 @@ function adatrain(mlp::MLP,
     n = size(x,2)
     converged::Bool = false
 
-    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(lossderivs)
+    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
 
     while (!converged && i < maxiter)
         i += 1
