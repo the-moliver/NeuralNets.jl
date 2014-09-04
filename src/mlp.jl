@@ -2,7 +2,7 @@
 
 using ArrayViews
 
-abstract NLayer{T}
+abstract Layer{T}
 
 type NNLayer{T} <: Layer{T}
     w::AbstractMatrix{T}
