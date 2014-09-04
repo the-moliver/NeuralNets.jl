@@ -22,6 +22,7 @@ function prop(mlp::MLP,x)
 			l.a = shift!(acts)
 		end
 	end
+	a
 end
 
 # add some 'missing' functionality to ArrayViews
