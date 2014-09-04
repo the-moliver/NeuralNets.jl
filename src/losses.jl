@@ -15,8 +15,8 @@ function poisson_loss(y, t)
 end
 
 function poisson_lossd(y, t)
-	y[y.==0] = eps(Float64)
-	1 .- (t ./ y)
+	d = 1 .- (t ./ y)
+	d[y.==0] = y .- t
 end
 
 linear_loss(y, t) = norm(y .- t, 1) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
