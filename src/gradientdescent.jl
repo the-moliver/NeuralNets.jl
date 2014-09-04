@@ -161,7 +161,7 @@ function rmsproptrain(mlp::MLP,
     append!(fitpoints, sample(fitpoints,numtoadd))
     numfitpoints = length(fitpoints)
 
-    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, numfitpoints/batch_size);
+    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, int(numfitpoints/batch_size))
 
     if epoch > 1
       η .*= learning_rate_factor
