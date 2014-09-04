@@ -17,6 +17,7 @@ end
 function poisson_lossd(y, t)
 	d = 1 .- (t ./ y)
 	d[y.==0] = y .- t
+	d
 end
 
 linear_loss(y, t) = norm(y .- t, 1) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))

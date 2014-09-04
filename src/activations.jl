@@ -35,6 +35,7 @@ ident(x) = x
 identd(x) = 1
 
 tanhd(x) = sech(x).^2
+expd(x) = exp(x)
 
 # dictionary of commonly-used activation derivatives
 derivs = Dict{Function, Function}([
@@ -45,7 +46,8 @@ derivs = Dict{Function, Function}([
                                    srelu     => srelud,
                                    nrelu     => nrelud, 
                                    ident     => identd, 
-                                   tanh      => tanhd
+                                   tanh      => tanhd,
+                                   exp      => expd
                                    ])
 
 # automatic differentiateion with ForwardDiff.jl
