@@ -9,6 +9,9 @@ squared_lossd(y, t) = y .- t # d/dx L(y, t) = (y - t)
 quartic_loss(y, t) = 0.25 * norm(y .- t).^4 
 quartic_lossd(y, t) = (y .- t).^3 
 
+poisson_loss(y, t) = sum(y .- t.*log(y));
+#poisson_lossd(y, t) = (y .- t).^3 
+
 linear_loss(y, t) = norm(y .- t, 1) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
 linear_lossd(y, t) = sign(y .- t)
 
