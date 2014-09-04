@@ -201,7 +201,7 @@ function rmsproptrain(mlp::MLP,
     if verbose
       e_old = e_new
       e_new = loss(prop(mlp.net,x),t)
-      println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
+      println("epoch: $epoch\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
     end    
 
   end
