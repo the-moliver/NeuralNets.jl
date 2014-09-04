@@ -8,16 +8,20 @@ logissafed(x) = logisd(min(x,400.0))
 srelu(x) = log(1 .+ exp(x))
 srelud(x) = 1 ./(1 .+ exp(-x))
 
-relu(x) = max(0.,x)
-relud(x) = (x .> 0) + 0.
+function relu(x) 
+	max(0.,x), NaN
+end
+
+relud(x,idx) = (x .> 0) + 0.
 
 function nrelu(x) 
 	a = max(0.,x)
 	a += sqrt(a).*randn(size(a))
 	a = max(0.,a)
+	a, NaN
 end
 
-nrelud(x) = (x .> 0) + 0.
+nrelud(x,idx) = (x .> 0) + 0.
 
 function donrelu(x) 
 	a = max(0.,x)
@@ -26,10 +30,15 @@ function donrelu(x)
 	idx = randperm(size(a,1))
 	a[idx[1:(.5*length(idx))],:] = 0.
 	a[idx[(.5*length(idx)+1):end],:] .*= 2.0
-	a
+	a, idx
 end
 
-donrelud(x) = (x .> 0) .* 2.
+function donrelud(x,idx) 
+	a = (x .> 0) + 0.
+	print(idx)
+	a[idx[1:(.5*length(idx))],:] = 0.
+	a[idx[(.5*length(idx)+1):end],:] .*= 2.0
+end
 
 ident(x) = x
 identd(x) = 1

@@ -38,10 +38,10 @@ function backprop!{T}(net::Vector{T}, stor::Vector{T}, x, t)
 
 		# forward activation
 		h = l * x
-		y = l.a(h)
+		y,idx = l.a(h)
 
 		# compute error recursively
-		δ = l.ad(h) .* backprop!(net[2:end], stor[2:end], y, t)
+		δ = l.ad(h,idx) .* backprop!(net[2:end], stor[2:end], y, t)
 
 		# calculate weight and bias gradients
 		stor[1].w[:] = vec(δ*x')
