@@ -175,7 +175,7 @@ function rmsproptrain(mlp::MLP,
         x_batch = x[:,fitpoints[:,i]]
         t_batch = t[:,fitpoints[:,i]]
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
-        ∇ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
         if i > 1 || epoch > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
