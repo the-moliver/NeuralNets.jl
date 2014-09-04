@@ -9,8 +9,15 @@ squared_lossd(y, t) = y .- t # d/dx L(y, t) = (y - t)
 quartic_loss(y, t) = 0.25 * norm(y .- t).^4 
 quartic_lossd(y, t) = (y .- t).^3 
 
-poisson_loss(y, t) = sum(y .- t.*log(y));
-poisson_lossd(y, t) =  1 .- (t ./ y)
+function poisson_loss(y, t)
+	y[y.==0] = eps(Float64)
+	sum(y .- t.*log(y))
+end
+
+function poisson_lossd(y, t)
+	y[y.==0] = eps(Float64)
+	1 .- (t ./ y)
+end
 
 linear_loss(y, t) = norm(y .- t, 1) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
 linear_lossd(y, t) = sign(y .- t)
@@ -25,7 +32,7 @@ log_lossd(y, t) = (t .- y) ./ ((y .- 1) .* y) # (t - y) / ((y - 1) * y)
 lossderivs = Dict{Function, Function}([
                                    squared_loss      => squared_lossd,
                                    linear_loss       => linear_lossd,
-                                   poisson_loss       => poisson_lossd,
+                                   poisson_loss      => poisson_lossd,
                                    quartic_loss      => quartic_lossd,
                                    hinge_loss        => hinge_lossd,
                                    log_loss          => log_lossd
