@@ -25,11 +25,11 @@ function donrelu(x)
 	a = max(0.,a)
 	idx = randperm(size(a,1))
 	a[idx[1:(.5*length(idx))],:] = 0.
-	#a[idx[(.5*length(idx)+1):end],:] .*= 2.0
+	a[idx[(.5*length(idx)+1):end],:] .*= 2.0
 	a
 end
 
-donrelud(x) = (x .> 0) + 0.
+donrelud(x) = (x .> 0) .* 2.
 
 ident(x) = x
 identd(x) = 1
