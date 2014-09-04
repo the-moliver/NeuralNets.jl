@@ -155,10 +155,10 @@ function rmsproptrain(mlp::MLP,
     
   while epoch < maxiter
     epoch += 1
-    fitpoints = 1:size(x,2)
+    fitpoints = [1:size(x,2)]
 
     numtoadd = batch_size - length(fitpoints)%batch_size
-    push!(fitpoints, sample(fitpoints,numtoadd))
+    append!(fitpoints, sample(fitpoints,numtoadd))
     numfitpoints = length(fitpoints)
 
     fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, numfitpoints/batch_size);
