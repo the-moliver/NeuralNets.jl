@@ -16,7 +16,7 @@ end
 
 function poisson_lossd(y, t)
 	d = 1 .- (t ./ y)
-	d[y.==0] = y .- t
+	d[y.==0] = y[y.==0] .- t[y.==0]
 	d
 end
 
