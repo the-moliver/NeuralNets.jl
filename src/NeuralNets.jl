@@ -8,7 +8,8 @@ import Optim:levenberg_marquardt
 # functions
 export train, gdmtrain, adatrain, prop, rmsproptrain
 export logis, logisd, logissafe, logissafed, relu, relud, srelu, srelud, nrelu, nrelud, donrelu, donrelud, ident, identd, tanhd
-
+export squared_loss, squared_lossd, linear_loss, linear_lossd, hinge_loss, hinge_lossd, log_loss, log_lossd
+ 
 # types
 export MLP, NNLayer
 

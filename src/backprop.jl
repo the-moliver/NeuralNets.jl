@@ -54,9 +54,9 @@ end
 
 # backprop(net,x,t) returns array of gradients and error for net 
 # todo: make gradient unshift! section more generic
-function backprop{T}(net::Vector{T}, x, t)
+function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
     if length(net) == 0   	# Final layer
-        δ  = x .- t     	# Error (δ) is simply difference with target
+        δ  = lossd(x,t)     	# Error (δ) is simply difference with target
         grad = T[]        	# Initialize weight gradient array
     else                	# Intermediate layers
         l = net[1]

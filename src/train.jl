@@ -2,7 +2,7 @@ using Optim
 import Optim.levenberg_marquardt
 using ArrayViews
 
-loss(y, t) = 0.5 * norm(y .- t).^2
+# loss(y, t) = 0.5 * norm(y .- t).^2
 
 # possibly useful functions to diagnose convergence problems
 # possibly to suggest learning rates with a while loop checking

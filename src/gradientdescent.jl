@@ -131,7 +131,8 @@ function rmsproptrain(mlp::MLP,
                   stepadapt_rate=.01,
                   minadapt=.5,
                   maxadapt=5.0,
-                  sqgradupdate_rate=.1,             
+                  sqgradupdate_rate=.1,
+                  loss=squared_loss,            
                   eval::Int=10,
                   verbose::Bool=true,
                   verboseiter::Int=100)
@@ -142,11 +143,13 @@ function rmsproptrain(mlp::MLP,
     e_new = loss(prop(mlp.net,x),t)
     converged::Bool = false
 
+    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(lossderivs)
+
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
         if i > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
           stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
