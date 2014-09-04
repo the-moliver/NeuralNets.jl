@@ -18,7 +18,17 @@ type TDMLP
 end
 
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
-*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
+#*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
+
+*(l::TDNNLayer, x::Array{Float64}) = begin
+	for ti=1:size(z,3)-size(W,3)+1
+    	for ti2=1:size(W,3)
+      		z2(:,:,ti) = z2(:,:,ti) + z(:,:,ti+ti2-1) * W(:,:,ti2);
+    	end
+  	end
+end
+
+
 .*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
 .*(l::TDNNLayer, c::FloatingPoint) = TDNNLayer(l.w.*c, l.b.*c, l.a, l.ad)
 .*(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
@@ -138,7 +148,7 @@ function calc_offsets(::Type{TDNNLayer}, dims)
 	offs
 end
 
-function TDMLP(genf::Function, layer_sizes::Vector{Int}, act::Vector{Function})
+function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function})
 	# some initializations
 	nlayers = length(layer_sizes) - 1
 	dims = [(layer_sizes[i+1],layer_sizes[i]) for i in 1:nlayers]
@@ -156,7 +166,7 @@ function TDMLP(genf::Function, layer_sizes::Vector{Int}, act::Vector{Function})
 	# our single data vector
 	buf = genf(offs[end])
 
-	net = [TDNNLayer(Array(eltype(buf),0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
+	net = [TDNNLayer(Array(eltype(buf),0,0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
 	mlp = MLP(net, dims, buf, offs, false)
 	unflatten_net!(mlp, buf)
