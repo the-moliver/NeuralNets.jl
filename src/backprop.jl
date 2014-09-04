@@ -8,13 +8,20 @@ end
 
 function prop(mlp::MLP,x)
 	if mlp.trained
+		acts = Function[]
 		for l in mlp.net
+			push!(acts,l.a)
 			if l.a == nrelu || l.a == donrelu
 				l.a = relu
 			end
 		end
 	end
-	prop(mlp.net,x)
+	a = prop(mlp.net,x)
+	if mlp.trained
+		for l in mlp.net
+			l.a = shift!(acts)
+		end
+	end
 end
 
 # add some 'missing' functionality to ArrayViews
