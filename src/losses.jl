@@ -5,6 +5,10 @@
 squared_loss(y, t) = 0.5 * norm(y .- t).^2 # L(y, t) = .5 || y - t ||^2 = .5 (y - t)^2
 squared_lossd(y, t) = y .- t # d/dx L(y, t) = (y - t)
 
+
+quartic_loss(y, t) = 0.25 * norm(y .- t).^4 
+quartic_lossd(y, t) = (y .- t).^3 
+
 linear_loss(y, t) = norm(y .- t, 1) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
 linear_lossd(y, t) = sign(y .- t)
 
@@ -18,6 +22,7 @@ log_lossd(y, t) = (t .- y) ./ ((y .- 1) .* y) # (t - y) / ((y - 1) * y)
 lossderivs = Dict{Function, Function}([
                                    squared_loss      => squared_lossd,
                                    linear_loss       => linear_lossd,
+                                   quartic_loss      => quartic_lossd,
                                    hinge_loss        => hinge_lossd,
                                    log_loss          => log_lossd
                                    ])
