@@ -1,3 +1,5 @@
+using StatsBase
+
 # batch
 # function to retrieve a random subset of data
 # currently quite ugly, if anyone knows how to do this better go ahead
