@@ -29,7 +29,7 @@ function donrelu(x)
 	a
 end
 
-donrelud(x) = (x .> 0) .* 2.
+donrelud(x) = (x .> 0) + 0.
 
 ident(x) = x
 identd(x) = 1
