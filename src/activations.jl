@@ -1,12 +1,20 @@
 # collection of commonly-used activation functions
-logis(x) = 1 ./(1 .+ exp(-x))
-logisd(x) = exp(x) ./ ((1 .+ exp(x)).^2)
+function logis(x)
+	1 ./(1 .+ exp(-x)), NaN
+end
+logisd(x,idx) = exp(x) ./ ((1 .+ exp(x)).^2)
 
-logissafe(x) = logis(x)
-logissafed(x) = logisd(min(x,400.0))
+function logissafe(x) 
+	logis(x), NaN
+end
+logissafed(x,idx) = logisd(min(x,400.0))
 
-srelu(x) = log(1 .+ exp(x))
-srelud(x) = 1 ./(1 .+ exp(-x))
+function srelu(x) 
+	log(1 .+ exp(x)), NaN
+end
+
+srelud(x,idx) = 1 ./(1 .+ exp(-x))
+
 
 function relu(x) 
 	max(0.,x), NaN
@@ -35,17 +43,25 @@ end
 
 function donrelud(x,idx) 
 	a = (x .> 0) + 0.
-	print(idx)
 	a[idx[1:(.5*length(idx))],:] = 0.
 	a[idx[(.5*length(idx)+1):end],:] .*= 2.0
 	a
 end
 
-ident(x) = x
-identd(x) = 1
+function ident(x) 
+	x, NaN
+end
+identd(x,idx) = 1
 
-tanhd(x) = sech(x).^2
-expd(x) = exp(x)
+function tanhact(x)
+	tanh(x), NaN
+end
+tanhactd(x,idx) = sech(x).^2
+
+function expact(x)
+	exp(x), NaN
+end
+expactd(x,idx) = exp(x)
 
 # dictionary of commonly-used activation derivatives
 derivs = Dict{Function, Function}([
@@ -56,8 +72,8 @@ derivs = Dict{Function, Function}([
                                    srelu     => srelud,
                                    nrelu     => nrelud, 
                                    ident     => identd, 
-                                   tanh      => tanhd,
-                                   exp      => expd
+                                   tanhact   => tanhactd,
+                                   expact      => expactd
                                    ])
 
 # automatic differentiateion with ForwardDiff.jl
