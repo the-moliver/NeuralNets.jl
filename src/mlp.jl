@@ -165,7 +165,7 @@ function MLP(genf::Function, layer_sizes::Vector{Int}, act::Vector{Function})
 	# our single data vector
 	buf = genf(offs[end])
 
-	net = [NNLayer(Array(eltype(buf),0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
+	net = [Layer(Array(eltype(buf),0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
 	mlp = MLP(net, dims, buf, offs, false)
 	unflatten_net!(mlp, buf)
