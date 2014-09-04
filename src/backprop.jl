@@ -61,9 +61,9 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
     else                	# Intermediate layers
         l = net[1]
         h = l * x           # Not a typo!
-        y = l.a(h)
+        y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t)
-        δ = l.ad(h) .* δ
+        δ = l.ad(h,idx) .* δ
         if any(isnan(δ))
         	print(δ)
         	error("Nans are starting")
