@@ -151,7 +151,7 @@ end
 function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function})
 	# some initializations
 	nlayers = length(layer_sizes) - 1
-	dims = [(layer_sizes[i+1],layer_sizes[i]) for i in 1:nlayers]
+	dims = [(layer_sizes[i+1],layer_sizes[i],layer_delays[i]) for i in 1:nlayers]
 
     # generate vector of activation derivatives
     actd = Function[]
@@ -168,24 +168,24 @@ function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{In
 
 	net = [TDNNLayer(Array(eltype(buf),0,0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
-	mlp = MLP(net, dims, buf, offs, false)
-	unflatten_net!(mlp, buf)
+	tdmlp = TDMLP(net, dims, buf, offs, false)
+	unflatten_net!(tdmlp, buf)
 
-	mlp
+	tdmlp
 end
 
 # Given a flattened vector (buf), update the neural
 # net so that each weight and bias vector points into the
 # offsets provided by offs
-function unflatten_net!(mlp::MLP, buf::AbstractVector)
-	mlp.buf = buf
+function unflatten_net!(tdmlp::TDMLP, buf::AbstractVector)
+	tdmlp.buf = buf
 
-	for i = 1 : length(mlp.net)
-		toff = i > 1 ? mlp.offs[i-1] : 0
-		tdims = mlp.dims[i]
+	for i = 1 : length(tdmlp.net)
+		toff = i > 1 ? tdmlp.offs[i-1] : 0
+		tdims = tdmlp.dims[i]
 		lenw = prod(tdims)
-		mlp.net[i].w = reshape_view(view(buf, toff+1:toff+lenw), tdims)
+		tdmlp.net[i].w = reshape_view(view(buf, toff+1:toff+lenw), tdims)
 		toff += lenw
-		mlp.net[i].b = view(buf, toff+1:toff+tdims[1])
+		tdmlp.net[i].b = view(buf, toff+1:toff+tdims[1])
 	end
 end

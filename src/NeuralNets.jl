@@ -17,6 +17,7 @@ export MLP, NNLayer
 include("activations.jl")
 include("losses.jl")
 include("mlp.jl")
+include("tdmlp.jl")
 
 # training
 include("backprop.jl")
