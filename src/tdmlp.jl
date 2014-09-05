@@ -20,13 +20,13 @@ end
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
 #*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
 
-*(l::TDNNLayer, x::Array{Float64}) = begin
-	for ti=1:size(z,3)-size(W,3)+1
-    	for ti2=1:size(W,3)
-      		z2(:,:,ti) = z2(:,:,ti) + z(:,:,ti+ti2-1) * W(:,:,ti2);
-    	end
-  	end
-end
+#*(l::TDNNLayer, x::Array{Float64}) = begin
+#	for ti=1:size(z,3)-size(W,3)+1
+#    	for ti2=1:size(W,3)
+#      		z2(:,:,ti) = z2(:,:,ti) + z(:,:,ti+ti2-1) * W(:,:,ti2);
+#    	end
+#  	end
+#end
 
 
 #.*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
