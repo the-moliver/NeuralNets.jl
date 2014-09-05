@@ -127,7 +127,7 @@ function adatrain(mlp::MLP,
     return mlp
 end
 
-# Train a MLP using RMSProp with momentum and adaptive step sizes.
+# Train a MLP using RMSProp with Nesterov momentum and adaptive step sizes.
 # mlp.net:  array of neural network layers
 # x:        input data
 # t:        target data
