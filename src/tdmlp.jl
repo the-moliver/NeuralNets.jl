@@ -3,7 +3,7 @@
 using ArrayViews
 
 type TDNNLayer{T}
-    w::AbstractMatrix{T}
+    w::AbstractArray{T}
     b::AbstractVector{T}
     a::Function
     ad::Function
@@ -11,7 +11,7 @@ end
 
 type TDMLP
     net::Vector{TDNNLayer}
-    dims::Vector{(Int,Int)}  # topology of net
+    dims::Vector{(Int,Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
     trained::Bool
