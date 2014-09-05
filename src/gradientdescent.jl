@@ -164,7 +164,7 @@ function rmsproptrain(mlp::MLP,
   while epoch < maxiter
     epoch += 1
 
-    fitpoints = sample_epoch(size(x,2), batch_size)
+    fitpoints = sample_epoch(n, batch_size) # Create mini-batch samples
 
     if epoch > 1
       η .*= learning_rate_factor
