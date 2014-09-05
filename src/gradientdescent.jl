@@ -11,6 +11,26 @@ function batch(b::Int,x::Array,t::Array)
     return x[:,index],t[:,index]
 end
 
+function mini_batch(x,t, fitpoints, mlp::MLP)
+  x_batch = x[:,fitpoints]
+  t_batch = t[:,fitpoints]
+
+  x_batch,t_batch
+end
+
+function mini_batch(x,t, fitpoints, tdmlp:TDMLP)
+  delays = tdmlp.delays
+  x_batch = zeros(size(x,1), length(fitpoints), delays+1)
+  for i=0:delays
+    x_batch[:,:,i+1] = x[:,fitpoints-delays+i]
+  end
+
+  t_batch = t[:,fitpoints]
+
+  x_batch,t_batch
+end
+
+
 function sample_epoch(datasize, batch_size)
     fitpoints = [1:datasize]
     numtoadd = batch_size - length(fitpoints)%batch_size
@@ -164,7 +184,7 @@ function rmsproptrain(mlp::MLP,
   while epoch < maxiter
     epoch += 1
 
-    fitpoints = sample_epoch(n, batch_size) # Create mini-batch samples
+    fitpoints = sample_epoch(n, batch_size)                                  # Create mini-batch sample points for epoch
 
     if epoch > 1
       η .*= learning_rate_factor
@@ -174,19 +194,20 @@ function rmsproptrain(mlp::MLP,
 
     while i < size(fitpoints,2)
         i += 1
-        x_batch = x[:,fitpoints[:,i]]
-        t_batch = t[:,fitpoints[:,i]]
-        mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
+
+        x_batch,t_batch = mini_batch(x,t, fitpoints[:,i], mlp)                # Create mini-batch
+
+        mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
         if i > 1 || epoch > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
-          stepadapt = max(min(stepadapt, maxadapt), minadapt)               # keep step size adaptation within range
+          stepadapt = max(min(stepadapt, maxadapt), minadapt)                # keep step size adaptation within range
         end
 
-        ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2       # running estimate of squared gradient
-        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))  # calculate Δ weights   
-        mlp.net = mlp.net .+ Δw_new       # update weights                       
-        Δw_old = Δw_new .+ m.*Δw_old       # keep track of all weight updates     
+        ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2        # running estimate of squared gradient
+        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))                        # calculate Δ weights   
+        mlp.net = mlp.net .+ Δw_new                                          # update weights                       
+        Δw_old = Δw_new .+ m.*Δw_old                                         # keep track of all weight updates     
     end
 
     if verbose

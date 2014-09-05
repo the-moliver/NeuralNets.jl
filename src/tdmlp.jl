@@ -14,6 +14,7 @@ type TDMLP
     dims::Vector{(Int,Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
+    delays::Vector{Int}    # total number of lags needed for forward pass
     trained::Bool
 end
 
@@ -21,9 +22,10 @@ end
 #*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
 
 #*(l::TDNNLayer, x::Array{Float64}) = begin
-#	for ti=1:size(z,3)-size(W,3)+1
-#    	for ti2=1:size(W,3)
-#      		z2(:,:,ti) = z2(:,:,ti) + z(:,:,ti+ti2-1) * W(:,:,ti2);
+# z2 = zeros(samplesize, size(l,2), size(x,3)-size(l,3)+1);
+#	for ti=1:size(x,3)-size(l,3)+1
+#    	for ti2=1:size(l,3)
+#      		z2(:,:,ti) = z2(:,:,ti) + x(:,:,ti+ti2-1) * W(:,:,ti2);
 #    	end
 #  	end
 #end
@@ -166,9 +168,11 @@ function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{In
 	# our single data vector
 	buf = genf(offs[end])
 
+	delays = sum(layer_delays) - length(layer_delays)
+
 	net = [TDNNLayer(Array(eltype(buf),0,0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
-	tdmlp = TDMLP(net, dims, buf, offs, false)
+	tdmlp = TDMLP(net, dims, buf, offs, delays, false)
 	unflatten_net!(tdmlp, buf)
 
 	tdmlp
