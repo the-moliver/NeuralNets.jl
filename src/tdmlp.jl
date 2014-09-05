@@ -29,10 +29,10 @@ end
 #end
 
 
-#.*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
-#.*(l::TDNNLayer, c::FloatingPoint) = TDNNLayer(l.w.*c, l.b.*c, l.a, l.ad)
-#.*(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
-#*(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
+.*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
+.*(l::TDNNLayer, c::FloatingPoint) = TDNNLayer(l.w.*c, l.b.*c, l.a, l.ad)
+.*(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
+*(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
 /(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w./m.w, l.b./m.b, l.a, l.ad)
 ^(l::TDNNLayer, c::FloatingPoint) = TDNNLayer(l.w.^c, l.b.^c, l.a, l.ad)
 -(l::TDNNLayer, m::TDNNLayer) = TDNNLayer(l.w .- m.w, l.b .- m.b, l.a, l.ad)
@@ -43,7 +43,7 @@ end
 .+(c::FloatingPoint, l::TDNNLayer)  = TDNNLayer(l.w .+ c, l.b .+ c, l.a, l.ad)
 
 
-#.*(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
+.*(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
 												net2=deepcopy(net)
 												for l in net2
 											    	l.w = l.w .* c
@@ -51,7 +51,7 @@ end
 											    end
 											    net2
 											end
-#.*(c::FloatingPoint, net::Array{TDNNLayer})  =  begin
+.*(c::FloatingPoint, net::Array{TDNNLayer})  =  begin
 												net2=deepcopy(net)
 												for l in net2
 											    	l.w = c.* l.w
