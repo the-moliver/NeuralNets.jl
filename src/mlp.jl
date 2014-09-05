@@ -9,13 +9,6 @@ type NNLayer{T}
     ad::Function
 end
 
-type TDNNLayer{T}
-    w::AbstractMatrix{T}
-    b::AbstractVector{T}
-    a::Function
-    ad::Function
-end
-
 type MLP
     net::Vector{NNLayer}
     dims::Vector{(Int,Int)}  # topology of net
