@@ -11,6 +11,14 @@ function batch(b::Int,x::Array,t::Array)
     return x[:,index],t[:,index]
 end
 
+function sample_epoch(datasize, batch_size)
+    fitpoints = [1:datasize]
+    numtoadd = batch_size - length(fitpoints)%batch_size
+    append!(fitpoints, sample(fitpoints,numtoadd))
+    numfitpoints = length(fitpoints)
+    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, int(numfitpoints/batch_size))
+end
+
 # Train a MLP using gradient decent with Nesterov momentum.
 # mlp.net:  array of neural network layers
 # x:        input data
@@ -155,13 +163,8 @@ function rmsproptrain(mlp::MLP,
     
   while epoch < maxiter
     epoch += 1
-    fitpoints = [1:size(x,2)]
 
-    numtoadd = batch_size - length(fitpoints)%batch_size
-    append!(fitpoints, sample(fitpoints,numtoadd))
-    numfitpoints = length(fitpoints)
-
-    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, int(numfitpoints/batch_size))
+    fitpoints = sample_epoch(size(x,2), batch_size)
 
     if epoch > 1
       η .*= learning_rate_factor
@@ -171,7 +174,6 @@ function rmsproptrain(mlp::MLP,
 
     while i < size(fitpoints,2)
         i += 1
-        #x_batch,t_batch = batch(b,x,t)
         x_batch = x[:,fitpoints[:,i]]
         t_batch = t[:,fitpoints[:,i]]
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
@@ -184,18 +186,7 @@ function rmsproptrain(mlp::MLP,
         ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2       # running estimate of squared gradient
         Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))  # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
-        Δw_old = Δw_new .+ m.*Δw_old       # keep track of all weight updates
-
-        #if i % eval == 0  # recalculate loss every eval number iterations
-        #    e_old = e_new
-        #    e_new = loss(prop(mlp.net,x),t)
-        #    converged = abs(e_new - e_old) < c # check if converged
-        #end
-        if verbose && i % verboseiter == 0
-            e_old = e_new
-            e_new = loss(prop(mlp.net,x),t)
-            println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
-        end        
+        Δw_old = Δw_new .+ m.*Δw_old       # keep track of all weight updates     
     end
 
     if verbose
