@@ -76,7 +76,7 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
         	print(δ)
         	error("Nans are starting")
 	    end
-        unshift!(grad,NNLayer(δ*x',vec(sum(δ,2)),exp,exp))  # Weight gradient
+        unshift!(grad,typeof(l)(δ*x',vec(sum(δ,2)),exp,exp))  # Weight gradient
         δ = l.w' * δ
     end
     return grad,δ

@@ -156,7 +156,7 @@ end
 # c:        convergence criterion
 # eval:     how often we evaluate the loss function
 # verbose:  train with printed feedback about the error function
-function rmsproptrain(mlp::MLP,
+function rmsproptrain(mlp::MLNN,
                   x,
                   t;
                   batch_size=size(x,2),
@@ -195,7 +195,7 @@ function rmsproptrain(mlp::MLP,
     while i < size(fitpoints,2)
         i += 1
 
-        x_batch,t_batch = mini_batch(x,t, fitpoints[:,i], mlp)                # Create mini-batch
+        x_batch,t_batch = mini_batch(x,t, fitpoints[:,i], mlp)               # Create mini-batch
 
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)

@@ -2,7 +2,7 @@
 
 using ArrayViews
 
-type TDNNLayer{T}
+type TDNNLayer{T} <: MLNN
     w::AbstractArray{T}
     b::AbstractVector{T}
     a::Function
