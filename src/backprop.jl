@@ -7,9 +7,9 @@ function prop(net, x)
 end
 
 function prop(net, x, delays::Int)
-	if length(net) == 0 # First layer
+	if length(net) == 0 # Input layer
 		x
-	elseif length(net) == 1 # First layer
+	elseif length(net) == 1 # First hidden layer, create 3d data to pass to rest of net
 
 		z = zeros(size(net.w,1), size(x,2));
 		for ti=1:size(net.w,3)
@@ -17,14 +17,14 @@ function prop(net, x, delays::Int)
 		end
 		z .+= (net.b + 0.)
 
-		z2 = zeros(size(z,1), size(z,2),delays+1);
+		z2 = zeros(size(z,1), size(z,2), delays+1);
 		for ii=0:delays
 			z2(:,:,ii+1) = [zeros(size(z,1), ii) z[:,1:end-ii]]
 		end
 		z2
 
 	else                    # Intermediate layers
-		net[end].a(net[end] * prop(net[1:end-1], x))[1]
+		net[end].a(net[end] * prop(net[1:end-1], x, delays))[1]
 	end
 end
 
