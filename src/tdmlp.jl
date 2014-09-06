@@ -37,7 +37,7 @@ end
   	gw = zeros(size(d,1), size(x,1), tt)
   	for ti=1:tt
     	for ti2 = 1:size(d,3)
-    		gw(:,:,ti) += d(:,:,ti2)*x(:,:,ti+ti2-1)';
+    		gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
     	end
   	end
   	gw

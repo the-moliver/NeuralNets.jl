@@ -131,7 +131,7 @@ function errprop(w::{Float64,3}, d::{Float64,3})
 	δ = zeros(size(w,1),size(d,1), size(w,3)+size(d,3)-1)
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
-	    	δ(:,:,ti+ti2-1) += w(:,:,ti)'*d(:,:,ti2);
+	    	δ[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
 	    end
 	end
 end
