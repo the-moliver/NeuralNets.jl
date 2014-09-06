@@ -117,8 +117,21 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
         	print(δ)
         	error("Nans are starting")
 	    end
-        unshift!(grad,typeof(l)(δ*x',vec(sum(δ,2)),exp,exp))  # Weight gradient
-        δ = l.w' * δ
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop(l.w, δ)
     end
     return grad,δ
+end
+
+function errprop(w::{Float64,2}, d::{Float64,2})
+	δ = w' * d
+end
+
+function errprop(w::{Float64,3}, d::{Float64,3})
+	δ = zeros(size(w,1),size(d,1), size(w,3)+size(d,3)-1)
+	for ti=1:size(w,3)
+	    for ti2 = 1:size(d,3)
+	    	δ(:,:,ti+ti2-1) += w(:,:,ti)'*d(:,:,ti2);
+	    end
+	end
 end

@@ -32,6 +32,16 @@ end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
 
+*(x::Array{Float64,3}, x::Array{Float64,3}) = begin
+ 	tt= size(x,3)-size(d,3)+1
+  	gw = zeros(size(d,1), size(x,1), tt)
+  	for ti=1:tt
+    	for ti2 = 1:size(d,3)
+    		gw(:,:,ti) += d(:,:,ti2)*x(:,:,ti+ti2-1)';
+    	end
+  	end
+  	gw
+end
 
 .*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
 .*(l::TDNNLayer, c::FloatingPoint) = TDNNLayer(l.w.*c, l.b.*c, l.a, l.ad)
