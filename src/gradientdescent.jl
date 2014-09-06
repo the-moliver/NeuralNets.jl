@@ -175,7 +175,7 @@ function rmsproptrain(mlp::MLNN,
   η, m, b = learning_rate, momentum_rate, batch_size
   e_old = Δw_old = epoch = 0
   stepadapt = ∇2 = mlp.net.^0.0
-  e_new = loss(prop(mlp.net,x),t)
+  e_new = loss(prop(mlp,x),t)
   converged::Bool = false
 
   lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
@@ -212,7 +212,7 @@ function rmsproptrain(mlp::MLNN,
 
     if verbose
       e_old = e_new
-      e_new = loss(prop(mlp.net,x),t)
+      e_new = loss(prop(mlp,x),t)
       println("epoch: $epoch\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
     end    
 
