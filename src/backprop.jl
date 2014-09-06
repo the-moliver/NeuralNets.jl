@@ -48,9 +48,9 @@ function prop(mlp::MLP,x)
 end
 
 function prop(tdmlp::TDMLP,x)
-	if mlp.trained
+	if tdmlp.trained
 		acts = Function[]
-		for l in mlp.net
+		for l in tdmlp.net
 			push!(acts,l.a)
 			if l.a == nrelu || l.a == donrelu
 				l.a = relu
@@ -58,8 +58,8 @@ function prop(tdmlp::TDMLP,x)
 		end
 	end
 	a = prop(tdmlp.net,x,tdmlp.delays)
-	if mlp.trained
-		for l in mlp.net
+	if tdmlp.trained
+		for l in tdmlp.net
 			l.a = shift!(acts)
 		end
 	end
