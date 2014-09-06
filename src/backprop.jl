@@ -2,8 +2,28 @@ function prop(net, x)
 	if length(net) == 0 # First layer
 		x
 	else # Intermediate layers
-		print("prop")
-		print(size(net))
+		net[end].a(net[end] * prop(net[1:end-1], x))[1]
+	end
+end
+
+function prop(net, x, delays::Int)
+	if length(net) == 0 # First layer
+		x
+	elseif length(net) == 1 # First layer
+
+		z = zeros(size(net.w,1), size(x,2));
+		for ti=1:size(net.w,3)
+			z += net.w[:,:,ti]*[zeros(size(x,1), ti-1) x[:,1:end-ti+1]]
+		end
+		z .+= (net.b + 0.)
+
+		z2 = zeros(size(z,1), size(z,2),delays+1);
+		for ii=0:delays
+			z2(:,:,ii+1) = [zeros(size(z,1), ii) z[:,1:end-ii]]
+		end
+		z2
+
+	else                    # Intermediate layers
 		net[end].a(net[end] * prop(net[1:end-1], x))[1]
 	end
 end
@@ -19,6 +39,25 @@ function prop(mlp::MLNN,x)
 		end
 	end
 	a = prop(mlp.net,x)
+	if mlp.trained
+		for l in mlp.net
+			l.a = shift!(acts)
+		end
+	end
+	a
+end
+
+function prop(tdmlp::TDMLP,x)
+	if mlp.trained
+		acts = Function[]
+		for l in mlp.net
+			push!(acts,l.a)
+			if l.a == nrelu || l.a == donrelu
+				l.a = relu
+			end
+		end
+	end
+	a = prop(tdmlp.net,x,tdmlp.delays)
 	if mlp.trained
 		for l in mlp.net
 			l.a = shift!(acts)

@@ -22,7 +22,7 @@ function mini_batch(x,t, fitpoints, tdmlp::TDMLP)
   delays = tdmlp.delays
   x_batch = zeros(size(x,1), length(fitpoints), delays+1)
   for i=0:delays
-    x_batch[:,:,i+1] = x[:,fitpoints-delays+i]
+    x_batch[:,:,i+1] = x[:,fitpoints-i]
   end
 
   t_batch = t[:,fitpoints]
