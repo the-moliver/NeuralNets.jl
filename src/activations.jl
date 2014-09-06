@@ -35,16 +35,20 @@ function donrelu(x)
 	a = max(0.,x)
 	a += sqrt(a).*randn(size(a))
 	a = max(0.,a)
+	print("act")
+	print(size(a))
 	idx = randperm(size(a,1))
-	a[idx[1:(.5*length(idx))],:] = 0.
-	a[idx[(.5*length(idx)+1):end],:] .*= 2.0
+	a[idx[1:(.5*length(idx))],:,:] = 0.
+	a[idx[(.5*length(idx)+1):end],:,:] .*= 2.0
 	a, idx
 end
 
 function donrelud(x,idx) 
 	a = (x .> 0) + 0.
-	a[idx[1:(.5*length(idx))],:] = 0.
-	a[idx[(.5*length(idx)+1):end],:] .*= 2.0
+	print("der")
+	print(size(a))
+	a[idx[1:(.5*length(idx))],:,:] = 0.
+	a[idx[(.5*length(idx)+1):end],:,:] .*= 2.0
 	a
 end
 

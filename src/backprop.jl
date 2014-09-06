@@ -2,11 +2,13 @@ function prop(net, x)
 	if length(net) == 0 # First layer
 		x
 	else # Intermediate layers
+		print("prop")
+		print(size(net))
 		net[end].a(net[end] * prop(net[1:end-1], x))[1]
 	end
 end
 
-function prop(mlp::MLP,x)
+function prop(mlp::MLNN,x)
 	if mlp.trained
 		acts = Function[]
 		for l in mlp.net
