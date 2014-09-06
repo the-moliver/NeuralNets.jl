@@ -32,7 +32,7 @@ end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
 
-*(x::Array{Float64,3}, x::Array{Float64,3}) = begin
+*(d::Array{Float64,3}, x::Array{Float64,3}) = begin
  	tt= size(x,3)-size(d,3)+1
   	gw = zeros(size(d,1), size(x,1), tt)
   	for ti=1:tt
