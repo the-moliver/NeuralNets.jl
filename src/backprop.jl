@@ -106,7 +106,6 @@ end
 function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
-        print("loss")
         grad = T[]        	# Initialize weight gradient array
     else                	# Intermediate layers
         l = net[1]
