@@ -14,8 +14,8 @@ export squared_loss, squared_lossd, linear_loss, linear_lossd, hinge_loss, hinge
 export MLP, NNLayer, TDMLP, TDNNLayer, MLNN
 
 # multi-layer perceptrons
-include("activations.jl")
 include("losses.jl")
+include("activations.jl")
 include("mlp.jl")
 include("tdmlp.jl")
 
