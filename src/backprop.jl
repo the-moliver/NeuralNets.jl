@@ -63,7 +63,7 @@ function prop(tdmlp::TDMLP,x)
 			l.a = shift!(acts)
 		end
 	end
-	a
+	a[:,:,1]
 end
 
 # add some 'missing' functionality to ArrayViews
