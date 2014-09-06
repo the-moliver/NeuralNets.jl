@@ -123,11 +123,11 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
     return grad,δ
 end
 
-function errprop(w::{Float64,2}, d::{Float64,2})
+function errprop(w::Array{Float64,2}, d::Array{Float64,2})
 	δ = w' * d
 end
 
-function errprop(w::{Float64,3}, d::{Float64,3})
+function errprop(w::Array{Float64,3}, d::Array{Float64,3})
 	δ = zeros(size(w,1),size(d,1), size(w,3)+size(d,3)-1)
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
