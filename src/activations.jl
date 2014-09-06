@@ -9,6 +9,15 @@ function logissafe(x)
 end
 logissafed(x,idx) = logisd(min(x,400.0))
 
+function softmax(x)
+	ex = exp(x)
+	ex ./ sum(ex,1), NaN
+end
+
+function softmaxsafe(x) 
+	softmax(min(x,400.0)), NaN
+end
+
 function srelu(x) 
 	log(1 .+ exp(x)), NaN
 end
@@ -65,8 +74,8 @@ expactd(x,idx) = exp(x)
 
 # dictionary of commonly-used activation derivatives
 derivs = Dict{Function, Function}([
-                                   logis     => logisd, 
-                                   logissafe => logissafed,
+                                   softmax     => logisd, 
+                                   softmaxsafe => logissafed,
                                    relu      => relud,
                                    donrelu   => donrelud,
                                    srelu     => srelud,
@@ -74,6 +83,17 @@ derivs = Dict{Function, Function}([
                                    ident     => identd, 
                                    tanhact   => tanhactd,
                                    expact      => expactd
+                                   ])
+
+
+# dictionary of cannonical activation/loss function pairs
+cannonical = Dict{Function, Function}([
+                                   logis     => log_loss, 
+                                   logissafe => log_loss,
+                                   ident     => squared_loss,
+                                   expact    => poisson_loss,
+                                   softmax     => xent_loss,
+                                   softmaxsafe => xent_loss
                                    ])
 
 # automatic differentiateion with ForwardDiff.jl

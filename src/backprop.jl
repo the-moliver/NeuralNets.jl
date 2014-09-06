@@ -103,7 +103,7 @@ end
 
 # backprop(net,x,t) returns array of gradients and error for net 
 # todo: make gradient unshift! section more generic
-function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
+function backprop{T}(net::Vector{T}, x, t, lossd::Function)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
         grad = T[]        	# Initialize weight gradient array
@@ -111,7 +111,7 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t)
+        grad,δ = backprop(net[2:end], y, t, lossd)
         δ = l.ad(h,idx) .* δ
         if any(isnan(δ))
         	print(δ)
@@ -122,6 +122,36 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
     end
     return grad,δ
 end
+
+function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop for cannonical activation/loss function pairs
+    if length(net) == 0   	# Final layer
+        δ  = x .- t     	# Error (δ) is simply difference with target
+        grad = T[]        	# Initialize weight gradient array
+    elseif length(net) == 1                	# Last hidden layer
+    	l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        grad,δ = backprop(net[2:end], y, t, lossd)
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop(l.w, δ)
+    else
+        l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        grad,δ = backprop(net[2:end], y, t, lossd)
+        δ = l.ad(h,idx) .* δ
+        if any(isnan(δ))
+        	print(δ)
+        	error("Nans are starting")
+	    end
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop(l.w, δ)
+    end
+    return grad,δ
+end
+
+
+
 
 function errprop(w::Array{Float64,2}, d::Array{Float64,2})
 	δ = w' * d

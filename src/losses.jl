@@ -6,6 +6,8 @@ squared_loss(y, t) = 0.5 * norm(y .- t).^2 # L(y, t) = .5 || y - t ||^2 = .5 (y 
 squared_lossd(y, t) = y .- t # d/dx L(y, t) = (y - t)
 
 
+xent_loss(y, t) = -sum(t.*log(y))
+
 quartic_loss(y, t) = 0.25 * sum(abs(y .- t).^4) 
 quartic_lossd(y, t) = (y .- t).^3 
 
