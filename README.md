@@ -5,8 +5,10 @@ Some features:
 * Flexible network topology with any combination of activation function/layer number.
 * Support for a number of common node activation functions in addition to support for arbitrary activation functions with the use of automatic differentiation.
 * A broad range of training algorithms to chose from.
+* Drop Out and multiplicative Gaussian noise regularization
+* Time Delay Neural Networks, with arbitrary time delays at each layer
 
-The next big thing is to finish implementing DropOut and add the option to use time delays.
+
 
 ## Usage
 Currently we only have support for multi-layer perceptrons, these are instantiated by using the `MLP(genf,layer_sizes,act)` constructor  to describe the network topology and initialisation procedure as follows:
