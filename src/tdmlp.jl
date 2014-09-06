@@ -14,21 +14,23 @@ type TDMLP
     dims::Vector{(Int,Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
-    delays::Vector{Int}    # total number of lags needed for forward pass
+    delays::Int    # total number of lags needed for forward pass
     trained::Bool
 end
 
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
 #*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
 
-#*(l::TDNNLayer, x::Array{Float64}) = begin
-# z2 = zeros(samplesize, size(l,2), size(x,3)-size(l,3)+1);
-#	for ti=1:size(x,3)-size(l,3)+1
-#    	for ti2=1:size(l,3)
-#      		z2(:,:,ti) = z2(:,:,ti) + x(:,:,ti+ti2-1) * W(:,:,ti2);
-#    	end
-#  	end
-#end
+*(l::TDNNLayer, x::Array{Float64}) = begin
+	nd = size(x,3)-size(l,3)+1
+	z = zeros(size(l.w,1), size(x,2), nd);
+	for ti = 1:nd
+    	for ti2 = 1:size(l.w,3)
+      		z[:,:,ti] += l.w[:,:,ti2]*x[:,:,ti+ti2-1];
+    	end
+  	end
+  	z .+= l.b
+end
 
 
 .*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
