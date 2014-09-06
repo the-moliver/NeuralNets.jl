@@ -19,7 +19,7 @@ function prop(net, x, delays::Int)
 
 		z2 = zeros(size(z,1), size(z,2), delays+1);
 		for ii=0:delays
-			z2(:,:,ii+1) = [zeros(size(z,1), ii) z[:,1:end-ii]]
+			z2[:,:,ii+1] = [zeros(size(z,1), ii) z[:,1:end-ii]]
 		end
 		z2
 
