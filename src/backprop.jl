@@ -13,7 +13,7 @@ function prop(net, x, delays::Int)
 
 		z = zeros(size(net[1].w,1), size(x,2));
 		for ti=1:size(net[1].w,3)
-			z += net[1].w[:,:,ti]*[zeros(size(x,1), ti-1) x[:,1:end-ti+1]]
+			z += view(net[1].w,:,:,ti)*[zeros(size(x,1), ti-1) x[:,1:end-ti+1]]
 		end
 		z .+= (net[1].b + 0.)
 
