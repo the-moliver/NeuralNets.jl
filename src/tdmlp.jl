@@ -22,7 +22,7 @@ end
 #*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
 
 *(l::TDNNLayer, x::Array{Float64}) = begin
-	nd = size(x,3)-size(l,3)+1
+	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(size(l.w,1), size(x,2), nd);
 	for ti = 1:nd
     	for ti2 = 1:size(l.w,3)
