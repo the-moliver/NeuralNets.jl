@@ -107,14 +107,12 @@ function backprop{T}(net::Vector{T}, x, t; lossd = squared_lossd)
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
         print("loss")
-        print(δ)
         grad = T[]        	# Initialize weight gradient array
     else                	# Intermediate layers
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t)
-        print(δ)
         δ = l.ad(h,idx) .* δ
         if any(isnan(δ))
         	print(δ)
@@ -137,4 +135,5 @@ function errprop(w::Array{Float64,3}, d::Array{Float64,3})
 	    	δ[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
 	    end
 	end
+	δ
 end
