@@ -29,7 +29,7 @@ end
       		z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
     	end
   	end
-  	z .+= l.b
+  	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
 
 
