@@ -18,7 +18,7 @@ function mini_batch(x,t, fitpoints, mlp::MLP)
   x_batch,t_batch
 end
 
-function mini_batch(x,t, fitpoints, tdmlp:TDMLP)
+function mini_batch(x,t, fitpoints, tdmlp::TDMLP)
   delays = tdmlp.delays
   x_batch = zeros(size(x,1), length(fitpoints), delays+1)
   for i=0:delays
