@@ -11,11 +11,11 @@ function prop(net, x, delays::Int)
 		x
 	elseif length(net) == 1 # First hidden layer, create 3d data to pass to rest of net
 
-		z = zeros(size(net.w,1), size(x,2));
-		for ti=1:size(net.w,3)
-			z += net.w[:,:,ti]*[zeros(size(x,1), ti-1) x[:,1:end-ti+1]]
+		z = zeros(size(net[1].w,1), size(x,2));
+		for ti=1:size(net[1].w,3)
+			z += net[1].w[:,:,ti]*[zeros(size(x,1), ti-1) x[:,1:end-ti+1]]
 		end
-		z .+= (net.b + 0.)
+		z .+= (net[1].b + 0.)
 
 		z2 = zeros(size(z,1), size(z,2), delays+1);
 		for ii=0:delays
