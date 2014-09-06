@@ -5,7 +5,7 @@ Some features:
 * Flexible network topology with any combination of activation function/layer number.
 * Support for a number of common node activation functions in addition to support for arbitrary activation functions with the use of automatic differentiation.
 * A broad range of training algorithms to chose from.
-* Drop Out and multiplicative Gaussian noise regularization
+* Drop Out and Poisson-like noise regularization
 * Time Delay Neural Networks, with arbitrary time delays at each layer
 
 
