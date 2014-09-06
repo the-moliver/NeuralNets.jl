@@ -28,7 +28,7 @@ function prop(net, x, delays::Int)
 	end
 end
 
-function prop(mlp::MLNN,x)
+function prop(mlp::MLP,x)
 	if mlp.trained
 		acts = Function[]
 		for l in mlp.net
