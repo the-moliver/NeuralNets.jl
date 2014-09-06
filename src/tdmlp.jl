@@ -2,14 +2,14 @@
 
 using ArrayViews
 
-type TDNNLayer{T} <: MLNN
+type TDNNLayer{T}
     w::AbstractArray{T}
     b::AbstractVector{T}
     a::Function
     ad::Function
 end
 
-type TDMLP
+type TDMLP <: MLNN
     net::Vector{TDNNLayer}
     dims::Vector{(Int,Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
