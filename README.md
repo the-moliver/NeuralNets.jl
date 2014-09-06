@@ -5,8 +5,10 @@ Some features:
 * Flexible network topology with any combination of activation function/layer number.
 * Support for a number of common node activation functions in addition to support for arbitrary activation functions with the use of automatic differentiation.
 * A broad range of training algorithms to chose from.
+* Drop Out and Poisson-like noise regularization
+* Time Delay Neural Networks, with arbitrary time delays at each layer
 
-The next big thing is to finish implementing DropOut and add the option to use time delays.
+
 
 ## Usage
 Currently we only have support for multi-layer perceptrons, these are instantiated by using the `MLP(genf,layer_sizes,act)` constructor  to describe the network topology and initialisation procedure as follows:
@@ -25,6 +27,8 @@ There is 'native' support for the following activation functions. If you define 
 * `logissafe` the logistic sigmoid with a 'safe' derivative which doesn't collapse when evaluating large values of x.
 * `srelu` soft rectified linear units , f(x) = log(1 .+ exp(x)).
 * `relu` rectified linear units , f(x) = max(0,x).
+* `nrelu` Poisson-like noisy rectified linear units , f(x) = max(0,x) + sqrt(max(0,x))*randn(size(x)).
+* `donrelu` Poisson-like noisy rectified linear units, f(x) = max(0,x) + sqrt(max(0,x))*randn(size(x)), with 50% drop out.
 * `tanh` hyperbolic tangent as it is already defined in Julia.
 
 ### Training Methods
