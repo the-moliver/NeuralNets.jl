@@ -26,7 +26,7 @@ end
 	z = zeros(size(l.w,1), size(x,2), nd);
 	for ti = 1:nd
     	for ti2 = 1:size(l.w,3)
-      		z[:,:,ti] += l.w[:,:,ti2]*x[:,:,ti+ti2-1];
+      		z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
     	end
   	end
   	z .+= l.b
