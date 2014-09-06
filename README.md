@@ -27,6 +27,8 @@ There is 'native' support for the following activation functions. If you define 
 * `logissafe` the logistic sigmoid with a 'safe' derivative which doesn't collapse when evaluating large values of x.
 * `srelu` soft rectified linear units , f(x) = log(1 .+ exp(x)).
 * `relu` rectified linear units , f(x) = max(0,x).
+* `nrelu` Poisson-like noisy rectified linear units , f(x) = max(0,x) + sqrt(max(0,x))*randn(size(x)).
+* `donrelu` Poisson-like noisy rectified linear units, f(x) = max(0,x) + sqrt(max(0,x))*randn(size(x)), with 50% drop out.
 * `tanh` hyperbolic tangent as it is already defined in Julia.
 
 ### Training Methods
