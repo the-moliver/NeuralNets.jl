@@ -10,12 +10,8 @@ end
 logissafed(x,idx) = logisd(min(x,400.0))
 
 function softmaxact(x)
-	ex = exp(x)
+	ex = exp(x-maximum(x))
 	ex ./ sum(ex,1), NaN
-end
-
-function softmaxactsafe(x) 
-	softmaxact(min(x,400.0))
 end
 
 function srelu(x) 
@@ -90,8 +86,7 @@ cannonical = Dict{Function, Function}([
                                    logissafe => log_loss,
                                    ident     => squared_loss,
                                    expact    => poisson_loss,
-                                   softmaxact     => xent_loss,
-                                   softmaxactsafe => xent_loss
+                                   softmaxact     => xent_loss
                                    ])
 
 # automatic differentiateion with ForwardDiff.jl
