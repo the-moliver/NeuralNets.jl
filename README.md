@@ -5,8 +5,8 @@ Some features:
 * Flexible network topology with any combination of activation function/layer number.
 * Support for a number of common node activation functions in addition to support for arbitrary activation functions with the use of automatic differentiation.
 * A broad range of training algorithms to chose from.
-* Drop Out and Poisson-like noise regularization
-* Time Delay Neural Networks, with arbitrary time delays at each layer
+* Drop Out and Poisson-like noise regularization.
+* Time Delay Neural Networks, with arbitrary time delays at each layer.
 
 
 
@@ -24,12 +24,13 @@ Once your neural network is initialised (and trained), predictions are made with
 There is 'native' support for the following activation functions. If you define an arbitrary activation function its derivative is calculated automatically using the [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) package. The natively supported activation derivatives are a bit over twice as fast to evaluate compared with derivatives calculated using [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl).
 * `ident` the identify function, f(x) = x.
 * `logis` the logistic sigmoid, f(x) = 1 ./(1 .+ exp(-x)).
+* `softmaxact` softmax activation function for multiclass classification, f(x) = exp(x) ./sum(exp(x)).
 * `logissafe` the logistic sigmoid with a 'safe' derivative which doesn't collapse when evaluating large values of x.
 * `srelu` soft rectified linear units , f(x) = log(1 .+ exp(x)).
 * `relu` rectified linear units , f(x) = max(0,x).
 * `nrelu` Poisson-like noisy rectified linear units , f(x) = max(0,x) + sqrt(max(0,x))*randn(size(x)).
 * `donrelu` Poisson-like noisy rectified linear units, f(x) = max(0,x) + sqrt(max(0,x))*randn(size(x)), with 50% drop out.
-* `tanh` hyperbolic tangent as it is already defined in Julia.
+* `tanhact` hyperbolic tangent activation f(x) = tanh(x).
 
 ### Training Methods
 Once the MLP type is constructed we train it using one of several provided training functions.
