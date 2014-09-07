@@ -15,7 +15,7 @@ function softmaxact(x)
 end
 
 function softmaxactsafe(x) 
-	softmaxact(min(x,400.0)), NaN
+	softmaxact(min(x,400.0))
 end
 
 function srelu(x) 
