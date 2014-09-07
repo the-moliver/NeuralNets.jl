@@ -11,7 +11,7 @@ logissafed(x,idx) = logisd(min(x,400.0))
 
 function softmaxact(x)
 	ex = exp(x.-maximum(x))
-	a = ex ./ sum(ex,1)
+	a = ex ./ max(eps(typeof(ex[1])), sum(ex,1))  ## prevent divide by zero
     if any(isnan(a))
     	print(maximum(ex))
     	print(maximum(sum(ex,1)))
