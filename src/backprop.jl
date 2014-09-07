@@ -146,6 +146,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
         δ = l.ad(h,idx) .* δ
         if any(isnan(δ))
         	print(δ)
+        	print(l.ad)
         	error("Nans are starting2")
 	    end
 
