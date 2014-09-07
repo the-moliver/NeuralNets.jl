@@ -10,7 +10,7 @@ end
 logissafed(x,idx) = logisd(min(x,400.0))
 
 function softmaxact(x)
-	ex = exp(x-maximum(x))
+	ex = exp(x.-maximum(x))
 	ex ./ sum(ex,1), NaN
 end
 
