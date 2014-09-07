@@ -11,7 +11,12 @@ logissafed(x,idx) = logisd(min(x,400.0))
 
 function softmaxact(x)
 	ex = exp(x.-maximum(x))
-	ex ./ sum(ex,1), NaN
+	a = ex ./ sum(ex,1)
+    if any(isnan(a))
+    	print(a)
+    	error("Nans are starting sm")
+    end
+	a, NaN
 end
 
 function srelu(x) 

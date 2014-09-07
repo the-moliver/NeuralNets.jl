@@ -132,6 +132,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
         h = l * x           # Not a typo!
         y,idx = l.a(h)
         if any(isnan(y))
+        	print(l.a)
         	error("Nans are starting5")
 	    end
         grad,δ = backprop(net[2:end], y, t, lossd)
@@ -145,7 +146,8 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
         h = l * x           # Not a typo!
         y,idx = l.a(h)
         if any(isnan(y))
-        	error("Nans are starting5")
+        	print(l.a)
+        	error("Nans are starting6")
 	    end
         grad,δ = backprop(net[2:end], y, t, lossd)
         if any(isnan(δ))
