@@ -137,12 +137,10 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t, lossd)
         if any(isnan(δ))
-        	print(δ)
         	error("Nans are starting1")
 	    end
         δ = l.ad(h,idx) .* δ
         if any(isnan(δ))
-        	print(δ)
         	error("Nans are starting2")
 	    end
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
