@@ -127,6 +127,11 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
         grad = T[]        	# Initialize weight gradient array
+        if any(isnan(δ))
+        	print(δ)
+        	print(l.ad)
+        	error("Nans are starting3")
+	    end
     elseif length(net) == 1                	# Last hidden layer
     	l = net[1]
         h = l * x           # Not a typo!
@@ -134,6 +139,11 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
         grad,δ = backprop(net[2:end], y, t, lossd)
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         δ = errprop(l.w, δ)
+        if any(isnan(δ))
+        	print(δ)
+        	print(l.ad)
+        	error("Nans are starting4")
+	    end
     else
         l = net[1]
         h = l * x           # Not a typo!
