@@ -104,7 +104,6 @@ end
 # backprop(net,x,t) returns array of gradients and error for net 
 # todo: make gradient unshift! section more generic
 function backprop{T}(net::Vector{T}, x, t, lossd::Function)  ## Backprop for non-cannonical activation/loss function pairs
-	print("unpaired")
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
         grad = T[]        	# Initialize weight gradient array
@@ -125,7 +124,6 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Function)  ## Backprop for non
 end
 
 function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop for cannonical activation/loss function pairs
-	print("paired")
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
         grad = T[]        	# Initialize weight gradient array
