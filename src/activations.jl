@@ -10,11 +10,16 @@ end
 logissafed(x,idx) = logisd(min(x,400.0))
 
 function softmaxact(x)
+	if any(isnan(x))
+    	error("Nans are starting sm1")
+    end
 	ex = exp(x.-maximum(abs(x),1))
+	if any(isnan(ex))
+    	error("Nans are starting sm2")
+    end
 	a = ex ./ sum(ex,1)
     if any(isnan(a))
-    	print(a)
-    	error("Nans are starting sm")
+    	error("Nans are starting sm3")
     end
 	a, NaN
 end
