@@ -11,14 +11,7 @@ logissafed(x,idx) = logisd(min(x,400.0))
 
 function softmaxact(x)
 	ex = exp(x.-maximum(x,1))
-	#a = ex ./ max(eps(typeof(ex[1])), sum(ex,1))  ## prevent divide by zero
 	a = ex ./ sum(ex,1)
-    if any(isnan(a))
-    	print(maximum(ex))
-    	print(maximum(sum(ex,1)))
-    	print(minimum(sum(ex,1)))
-    	error("Nans are starting sm")
-    end
 	a, NaN
 end
 
