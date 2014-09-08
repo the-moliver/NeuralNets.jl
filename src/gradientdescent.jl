@@ -63,23 +63,27 @@ function gdmtrain(mlp::MLP,
     n = size(x,2)
     η, c, m, b = learning_rate, tol, momentum_rate, batch_size
     i = e_old = Δw_old = 0
-    e_new = loss(prop(mlp.net,x),t)
+    e_new = loss(prop(mlp,x),t)
     converged::Bool = false
 
-    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+    if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
+        lossd = []
+    else
+        lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+    end
 
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
         Δw_new = -η*∇                     # calculate Δ weights   
         mlp.net = mlp.net .+ Δw_new       # update weights                       
         Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
 
         if i % eval == 0  # recalculate loss every eval number iterations
             e_old = e_new
-            e_new = loss(prop(mlp.net,x),t)
+            e_new = loss(prop(mlp,x),t)
             converged = abs(e_new - e_old) < c # check if converged
         end
         if verbose && i % verboseiter == 0
@@ -91,6 +95,7 @@ function gdmtrain(mlp::MLP,
     println("* learning rate η = $η")
     println("* momentum coefficient m = $m")
     println("* convergence criterion c = $c")
+    mlp.trained=true
     return mlp
 end
 
@@ -117,23 +122,27 @@ function adatrain(mlp::MLP,
 
     η, c, λ, b = learning_rate, tol, lambda, batch_size
     i = e_old = Δnet = sumgrad = 0.0
-    e_new = loss(prop(mlp.net,x),t)
+    e_new = loss(prop(mlp,x),t)
     n = size(x,2)
     converged::Bool = false
 
-    lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+    if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
+        lossd = []
+    else
+        lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+    end
 
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd=lossd)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
         sumgrad += ∇ .^ 2.       # store sum of squared past gradients
         Δw = η * ∇ ./ (λ .+ (sumgrad .^ 0.5))   # calculate Δ weights
         mlp.net = mlp.net .- Δw                 # update weights
 
         if i % eval == 0  # recalculate loss every eval number iterations
             e_old = e_new
-            e_new = loss(prop(mlp.net,x),t)
+            e_new = loss(prop(mlp,x),t)
             converged = abs(e_new - e_old) < c # check if converged
         end
         if verbose && i % 100 == 0
@@ -144,6 +153,7 @@ function adatrain(mlp::MLP,
     println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
     println("* learning rate η = $η")
     println("* convergence criterion c = $c")
+    mlp.trained=true
     return mlp
 end
 
@@ -176,7 +186,6 @@ function rmsproptrain(mlp::MLNN,
   e_old = Δw_old = epoch = 0
   stepadapt = ∇2 = mlp.net.^0.0
   e_new = loss(prop(mlp,x),t)
-  converged::Bool = false
 
   if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
       lossd = []
@@ -221,7 +230,6 @@ function rmsproptrain(mlp::MLNN,
 
   end
 
-  #convgstr = converged ? "converged" : "didn't converge"
   println("Training finished in $epoch epochs; average error: $(round((e_new/n),4)).")
   println("* learning rate η = $η")
   println("* momentum coefficient m = $m")
