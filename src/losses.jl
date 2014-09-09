@@ -12,12 +12,12 @@ quartic_loss(y, t) = 0.25 * sum(abs(y .- t).^4)
 quartic_lossd(y, t) = (y .- t).^3 
 
 function poisson_loss(y, t)
-	y[y.==0] = eps(FloatingPoint)
+	y[y.==0] = eps(typeof(y[1]))
 	sum(y .- t.*log(y))
 end
 
 function poisson_lossd(y, t)
-	y[y.==0] = eps(FloatingPoint)
+	y[y.==0] = eps(typeof(y[1]))
 	d = 1 .- (t ./ y)
 	#d[y.==0] = y[y.==0] .- t[y.==0]
 	#d
