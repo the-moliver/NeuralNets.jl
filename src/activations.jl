@@ -97,6 +97,8 @@ expactd(x,idx) = exp(x)
 
 # dictionary of commonly-used activation derivatives
 derivs = Dict{Function, Function}([
+                                   logis 	 => logisd,
+                                   logissafe => logissafed,
                                    relu      => relud,
                                    donrelu   => donrelud,
                                    srelu     => srelud,
@@ -121,6 +123,6 @@ cannonical = Dict{Function, Function}([
 # will only produce derivatives with Float64 methods
 function autodiff(activ::Function)
     f(x) = activ(x[1])
-    forwarddiff_derivative(x::Float64) = forwarddiff_gradient(f,Float64)([x])[1]
+    forwarddiff_derivative(x::Float64, idx) = forwarddiff_gradient(f,Float64)([x])[1]
     return forwarddiff_derivative
 end
