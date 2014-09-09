@@ -114,8 +114,8 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Function)  ## Backprop for non
         grad,δ = backprop(net[2:end], y, t, lossd)
         δ = l.ad(h,idx) .* δ
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
-        print(l.w)
-        print(δ)
+        typeof(l.w)
+        typeof(δ)
         δ = errprop(l.w, δ)
     end
     return grad,δ
