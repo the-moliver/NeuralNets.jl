@@ -56,14 +56,14 @@ function train{T}(nn_in::T,
 
 	converged=false
 	numiter=0
-	gradnorm=FloatingPoint[]
+	gradnorm=typeof(trainx[1])[]
 	lastval=Inf
 	r = []
 	if train_method == :levenberg_marquardt
 		out_dim = size(traint,1)
 		ln = nn.offs[end]
 		n = size(trainx,2)
-		jacobian = Array(FloatingPoint, ln, n, out_dim)
+		jacobian = Array(typeof(trainx[1]), ln, n, out_dim)
 		function g(nd)
 			unflatten_net!(nn, vec(nd))
 			for i = 1 : n
