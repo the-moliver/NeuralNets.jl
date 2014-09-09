@@ -15,32 +15,55 @@ function softmaxact(x)
 	a, NaN
 end
 
-function srelu(x) 
-	log(1. .+ exp(x)), NaN
-end
 
-srelud(x,idx) = 1. ./(1. .+ exp(-x))
-
-
-function relu(x) 
-	max(0.,x), NaN
-end
-
-relud(x,idx) = convert(typeof(x), (x .> 0.))
-
-function nrelu(x) 
-	a = max(0.,x)
-	a += sqrt(a).*randn(size(a))
-	a = max(0.,a)
+function srelu(x)
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = log(1. + exp(x[ii]))
+	end
 	a, NaN
 end
 
-nrelud(x,idx) = convert(typeof(x), (x .> 0.))
+function srelud(x,idx)
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = 1 /(1. + exp(-x[ii]))
+	end
+	a, NaN
+end
+
+function relu(x) 
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? x[ii] : 0.
+	end
+	a,NaN
+end
+
+function relud(x,idx) 
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? 1.0 : 0.0
+	end
+	a, NaN
+end
+
+function nrelu(x) 
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? max(0. , x[ii] + sqrt(x[ii]).*randn()) : 0.
+	end
+	a,NaN
+end
+
+
+nrelud(x,idx) = relud(x,idx)
 
 function donrelu(x) 
-	a = max(0.,x)
-	a += sqrt(a).*randn(size(a))
-	a = max(0.,a)
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? max(0. , x[ii] + sqrt(x[ii]).*randn()) : 0.
+	end
 	idx = randperm(size(a,1))
 	a[idx[1:(.5*length(idx))],:,:] = 0.
 	a[idx[(.5*length(idx)+1):end],:,:] .*= 2.0
@@ -48,7 +71,10 @@ function donrelu(x)
 end
 
 function donrelud(x,idx) 
-	a = convert(typeof(x), (x .> 0.))
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? 1.0 : 0.0
+	end
 	a[idx[1:(.5*length(idx))],:,:] = 0.
 	a[idx[(.5*length(idx)+1):end],:,:] .*= 2.0
 	a
