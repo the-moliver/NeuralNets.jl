@@ -131,8 +131,7 @@ function adatrain(mlp::MLNN,
     else
         lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
     end
-    print(lossd)
-    print(loss)
+
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
@@ -172,13 +171,13 @@ function rmsproptrain(mlp::MLNN,
                   t;
                   batch_size=size(x,2),
                   maxiter::Int=100,
-                  learning_rate::Float64=.3,
-                  learning_rate_factor::Float64=.999,
-                  momentum_rate::Float64=.6,
-                  stepadapt_rate::Float64=.01,
-                  minadapt::Float64=.5,
-                  maxadapt::Float64=5.0,
-                  sqgradupdate_rate::Float64=.1,
+                  learning_rate::FloatingPoint=.3,
+                  learning_rate_factor::FloatingPoint=.999,
+                  momentum_rate::FloatingPoint=.6,
+                  stepadapt_rate::FloatingPoint=.01,
+                  minadapt::FloatingPoint=.5,
+                  maxadapt::FloatingPoint=5.0,
+                  sqgradupdate_rate::FloatingPoint=.1,
                   loss=squared_loss,            
                   verbose::Bool=true,
                   verboseiter::Int=100)
@@ -193,8 +192,7 @@ function rmsproptrain(mlp::MLNN,
   else
       lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
   end
-    print(lossd)
-    print(loss)
+    
   while epoch < maxiter
     epoch += 1
 

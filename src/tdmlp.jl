@@ -19,9 +19,9 @@ type TDMLP <: MLNN
 end
 
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
-#*(l::TDNNLayer, x::Array{Float64}) = l.w*x .+ l.b
+#*(l::TDNNLayer, x::Array{FloatingPoint}) = l.w*x .+ l.b
 
-*(l::TDNNLayer, x::Array{Float64,3}) = begin
+*(l::TDNNLayer, x::Array{FloatingPoint,3}) = begin
 	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(size(l.w,1), size(x,2), nd);
 	for ti = 1:nd
@@ -32,7 +32,7 @@ end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
 
-*(d::Array{Float64,3}, x::Array{Float64,3}) = begin
+*(d::Array{FloatingPoint,3}, x::Array{FloatingPoint,3}) = begin
  	tt= size(x,3)-size(d,3)+1
   	gw = zeros(size(d,1), size(x,1), tt)
   	for ti=1:tt

@@ -147,11 +147,11 @@ end
 
 
 
-function errprop(w::Array{Float64,2}, d::Array{Float64,2})
+function errprop(w, d)
 	δ = w' * d
 end
 
-function errprop(w::Array{Float64,3}, d::Array{Float64,3})
+function errprop(w::Array{FloatingPoint,3}, d::Array{FloatingPoint,3})
 	δ = zeros(size(w,2),size(d,2), size(w,3)+size(d,3)-1)
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
