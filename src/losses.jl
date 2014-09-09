@@ -2,7 +2,7 @@
 
 # y = predicted value, t = expected value
 
-squared_loss(y, t) = 0.5 * norm(y .- t).^2 # L(y, t) = .5 || y - t ||^2 = .5 (y - t)^2
+squared_loss(y, t) = 0.5 * norm(y .- t).^2. # L(y, t) = .5 || y - t ||^2 = .5 (y - t)^2
 squared_lossd(y, t) = y .- t # d/dx L(y, t) = (y - t)
 
 
