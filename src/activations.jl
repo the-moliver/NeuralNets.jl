@@ -1,8 +1,8 @@
 # collection of commonly-used activation functions
 function logis(x)
-	1 ./(1 .+ exp(-x)), NaN
+	1. ./(1 .+ exp(-x)), NaN
 end
-logisd(x,idx) = exp(x) ./ ((1 .+ exp(x)).^2)
+logisd(x,idx) = exp(x) ./ ((1. .+ exp(x)).^2.)
 
 function logissafe(x) 
 	logis(x), NaN
@@ -16,17 +16,17 @@ function softmaxact(x)
 end
 
 function srelu(x) 
-	log(1 .+ exp(x)), NaN
+	log(1. .+ exp(x)), NaN
 end
 
-srelud(x,idx) = 1 ./(1 .+ exp(-x))
+srelud(x,idx) = 1. ./(1. .+ exp(-x))
 
 
 function relu(x) 
 	max(0.,x), NaN
 end
 
-relud(x,idx) = (x .> 0) + 0.
+relud(x,idx) = convert(typeof(x), (x .> 0.))
 
 function nrelu(x) 
 	a = max(0.,x)
@@ -35,7 +35,7 @@ function nrelu(x)
 	a, NaN
 end
 
-nrelud(x,idx) = (x .> 0) + 0.
+nrelud(x,idx) = convert(typeof(x), (x .> 0.))
 
 function donrelu(x) 
 	a = max(0.,x)
@@ -48,7 +48,7 @@ function donrelu(x)
 end
 
 function donrelud(x,idx) 
-	a = (x .> 0) + 0.
+	a = convert(typeof(x), (x .> 0.))
 	a[idx[1:(.5*length(idx))],:,:] = 0.
 	a[idx[(.5*length(idx)+1):end],:,:] .*= 2.0
 	a
@@ -57,12 +57,12 @@ end
 function ident(x) 
 	x, NaN
 end
-identd(x,idx) = 1
+identd(x,idx) = 1.
 
 function tanhact(x)
 	tanh(x), NaN
 end
-tanhactd(x,idx) = sech(x).^2
+tanhactd(x,idx) = sech(x).^2.
 
 function expact(x)
 	exp(x), NaN
