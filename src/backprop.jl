@@ -145,7 +145,7 @@ end
 
 
 
-function errprop(w, d)
+function errprop(w::Array{FloatingPoint,2}, d::Array{FloatingPoint,2})
 	δ = w' * d
 end
 
