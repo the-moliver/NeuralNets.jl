@@ -131,7 +131,8 @@ function adatrain(mlp::MLNN,
     else
         lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
     end
-
+    print(lossd)
+    print(loss)
     while (!converged && i < maxiter)
         i += 1
         x_batch,t_batch = batch(b,x,t)
@@ -186,7 +187,8 @@ function rmsproptrain(mlp::MLNN,
   e_old = Δw_old = epoch = 0
   stepadapt = ∇2 = mlp.net.^0.0
   e_new = loss(prop(mlp,x),t)
-
+    print(lossd)
+    print(loss)
   if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
       lossd = []
   else
