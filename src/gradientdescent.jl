@@ -48,7 +48,7 @@ end
 # c:        convergence criterion
 # eval:     how often we evaluate the loss function
 # verbose:  train with printed feedback about the error function
-function gdmtrain(mlp::MLP,
+function gdmtrain(mlp::MLNN,
                   x,
                   t;
                   batch_size=size(x,2),
@@ -108,7 +108,7 @@ end
 # ε:        small constant for numerical stability
 # eval:     how often we evaluate the loss function
 # verbose:  train with printed feedback about the error function
-function adatrain(mlp::MLP,
+function adatrain(mlp::MLNN,
                   x,
                   t;
                   batch_size=size(x,2),                  
