@@ -29,7 +29,7 @@ function srelud(x,idx)
 	for ii=1:prod(size(x))
 		a[ii] = 1 /(1. + exp(-x[ii]))
 	end
-	a, NaN
+	a
 end
 
 function relu(x) 
@@ -45,7 +45,7 @@ function relud(x,idx)
 	for ii=1:prod(size(x))
 		a[ii] = x[ii] > 0. ? 1.0 : 0.0
 	end
-	a, NaN
+	a
 end
 
 function nrelu(x) 
