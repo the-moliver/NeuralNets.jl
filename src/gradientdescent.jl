@@ -183,7 +183,7 @@ function rmsproptrain(mlp::MLNN,
                   verboseiter::Int=100)
   n = size(x,2)
   η, m, b = learning_rate, momentum_rate, batch_size
-  e_old = Δw_old = epoch = eltype(x)(0.)
+  e_old = Δw_old = epoch = 0.
   stepadapt = ∇2 = mlp.net.^0.0
   e_new = loss(prop(mlp,x),t)
 
