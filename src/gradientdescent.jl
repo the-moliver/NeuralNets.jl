@@ -210,17 +210,31 @@ function rmsproptrain(mlp::MLNN,
         x_batch,t_batch = mini_batch(x,t, fitpoints[:,i], mlp)               # Create mini-batch
 
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
-
+        print("mlp.net[1].w")
+        print(eltype(mlp.net[1].w))
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
+        print("∇[1].w")
+        print(eltype(∇[1].w))
         if i > 1 || epoch > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
+          print("stepadapt1")
+          print(eltype(stepadapt[1].w))   
+
           stepadapt = max(min(stepadapt, maxadapt), minadapt)                # keep step size adaptation within range
+          print("stepadapt2")
+          print(eltype(stepadapt[1].w))  
         end
 
         ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2        # running estimate of squared gradient
-        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))                        # calculate Δ weights   
+        print("∇2")
+        print(eltype(∇2[1].w)) 
+        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))                        # calculate Δ weights
+        print("Δw_new")
+        print(eltype(Δw_new[1].w))   
         mlp.net = mlp.net .+ Δw_new                                          # update weights                       
-        Δw_old = Δw_new .+ m.*Δw_old                                         # keep track of all weight updates     
+        Δw_old = Δw_new .+ m.*Δw_old                                         # keep track of all weight updates
+        print("Δw_old")
+        print(eltype(Δw_old[1].w))      
     end
 
     if verbose
