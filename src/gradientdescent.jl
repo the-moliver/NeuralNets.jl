@@ -184,7 +184,10 @@ function rmsproptrain(mlp::MLNN,
   n = size(x,2)
   η, m, b = learning_rate, momentum_rate, batch_size
   e_old = Δw_old = epoch = 0.
-  stepadapt = ∇2 = mlp.net.^0.0
+  f0 = convert(eltype(X), 0.0)
+  f2 = convert(eltype(X), 2.0)
+  f05 = convert(eltype(X), 0.5)
+  stepadapt = ∇2 = mlp.net.^f0
   e_new = loss(prop(mlp,x),t)
 
   if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
@@ -225,10 +228,10 @@ function rmsproptrain(mlp::MLNN,
           print(eltype(stepadapt[1].w))  
         end
 
-        ∇2 = sqgradupdate_rate.*∇.^2. + (1.0 .-sqgradupdate_rate).*∇2        # running estimate of squared gradient
+        ∇2 = sqgradupdate_rate.*∇.^f2 + (1.0 .-sqgradupdate_rate).*∇2        # running estimate of squared gradient
         print("∇2")
         print(eltype(∇2[1].w)) 
-        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^0.5))                        # calculate Δ weights
+        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^f05))                        # calculate Δ weights
         print("Δw_new")
         print(eltype(Δw_new[1].w))   
         mlp.net = mlp.net .+ Δw_new                                          # update weights                       
