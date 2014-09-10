@@ -34,7 +34,7 @@ end
 
 *(d::Array{Float64,3}, x::Array{Float64,3}) = begin
  	tt= size(x,3)-size(d,3)+1
-  	gw = zeros(size(d,1), size(x,1), tt)
+  	gw = zeros(eltype(x), size(d,1), size(x,1), tt)
   	for ti=1:tt
     	for ti2 = 1:size(d,3)
     		gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
@@ -56,7 +56,7 @@ end
 
 *(d::Array{Float32,3}, x::Array{Float32,3}) = begin
  	tt= size(x,3)-size(d,3)+1
-  	gw = zeros(size(d,1), size(x,1), tt)
+  	gw = zeros(eltype(x), size(d,1), size(x,1), tt)
   	for ti=1:tt
     	for ti2 = 1:size(d,3)
     		gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
