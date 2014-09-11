@@ -184,7 +184,7 @@ function calc_offsets(::Type{TDNNLayer}, dims)
 	offs
 end
 
-function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function})
+function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function}, datatype)
 	# some initializations
 	nlayers = length(layer_sizes) - 1
 	dims = [(layer_sizes[i+1],layer_sizes[i],layer_delays[i]) for i in 1:nlayers]
@@ -200,7 +200,14 @@ function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{In
 	offs = calc_offsets(TDNNLayer, dims)
 
 	# our single data vector
-	buf = genf(offs[end])
+	buf = datatype[]
+	for ii = 1:length(layer_sizes)-1
+		nw = layer_sizes[ii]*layer_sizes[ii+1]*layer_delays[ii]
+		nb = layer_sizes[ii+1]
+		buf = [buf; 2.*(rand(datatype, nw,1)-.5).*sqrt(6.)./ sqrt(layer_sizes[ii]*layer_delays[ii] + layer_sizes[ii+1]); zeros(datatype, nb,1)]
+	end
+	buf = vec(buf)
+	#buf = genf(offs[end])
 
 	delays = sum(layer_delays) - length(layer_delays)
 
