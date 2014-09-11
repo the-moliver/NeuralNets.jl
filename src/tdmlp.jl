@@ -184,7 +184,7 @@ function calc_offsets(::Type{TDNNLayer}, dims)
 	offs
 end
 
-function TDMLP(genf::Function, layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function}, datatype)
+function TDMLP(layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function}; datatype = Float32)
 	# some initializations
 	nlayers = length(layer_sizes) - 1
 	dims = [(layer_sizes[i+1],layer_sizes[i],layer_delays[i]) for i in 1:nlayers]
