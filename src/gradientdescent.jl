@@ -30,6 +30,18 @@ function mini_batch(x,t, fitpoints, tdmlp::TDMLP)
   x_batch,t_batch
 end
 
+function maxnormreg!(net, maxnorm)
+  for l in net
+    for hu = 1:size(l.w,1)
+      norms = sqrt(sum(view(l.w,hu,:) .^2.0))
+      if norms>maxnorm
+        for ii=1:size(l.w,2)
+          l.w[hu,ii] .*= maxnorm/norms
+        end
+      end
+    end
+  end
+end
 
 function sample_epoch(datasize, batch_size)
     fitpoints = [1:datasize]
@@ -178,6 +190,7 @@ function rmsproptrain(mlp::MLNN,
                   minadapt::FloatingPoint=.5,
                   maxadapt::FloatingPoint=5.0,
                   sqgradupdate_rate::FloatingPoint=.1,
+                  maxnorm::FloatingPoint=0.0,
                   loss=squared_loss,            
                   verbose::Bool=true,
                   verboseiter::Int=100)
@@ -224,7 +237,12 @@ function rmsproptrain(mlp::MLNN,
         ∇2 = sqgradupdate_rate.*∇.^f2 + (1.0 .-sqgradupdate_rate).*∇2        # running estimate of squared gradient
         Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^f05))                        # calculate Δ weights
 
-        mlp.net = mlp.net .+ Δw_new                                          # update weights                       
+        mlp.net = mlp.net .+ Δw_new                                          # update weights
+
+        if maxnorm > 0.0
+          maxnormreg!(mlp.net, maxnorm)
+        end
+
         Δw_old = Δw_new .+ m.*Δw_old                                         # keep track of all weight updates
     
     end
