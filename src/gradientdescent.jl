@@ -196,7 +196,7 @@ function rmsproptrain(mlp::MLNN,
                   maxiter::Int=100,
                   learning_rate::FloatingPoint=.3,
                   learning_rate_factor::FloatingPoint=.999,
-                  momentum_rate::FloatingPoint=.6,
+                  momentum_rate::FloatingPoint=.5,
                   stepadapt_rate::FloatingPoint=.01,
                   minadapt::FloatingPoint=.5,
                   maxadapt::FloatingPoint=5.0,
@@ -252,7 +252,7 @@ function rmsproptrain(mlp::MLNN,
         end
 
         ∇2 = sqgradupdate_rate.*∇.^f2 + (1.0 .-sqgradupdate_rate).*∇2        # running estimate of squared gradient
-        Δw_new = stepadapt .* (-η .* ∇ ./  (∇2.^f05))                        # calculate Δ weights
+        Δw_new = stepadapt .* (-η .* (1-m) .* ∇ ./  (∇2.^f05))                        # calculate Δ weights
 
         mlp.net = mlp.net .+ Δw_new                                          # update weights
 
