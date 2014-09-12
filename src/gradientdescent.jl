@@ -30,17 +30,28 @@ function mini_batch(x,t, fitpoints, tdmlp::TDMLP)
   x_batch,t_batch
 end
 
+#function maxnormreg!(net, maxnorm)
+#  for l in net
+#    for hu = 1:size(l.w,1)
+#      norms = sqrt(sum(view(l.w,hu,:) .^2.0))
+#      if norms>maxnorm
+#        for ii=1:size(l.w,2)
+#          l.w[hu,ii] .*= maxnorm/norms
+#        end
+#      end
+#    end
+#  end
+#end
+
 function maxnormreg!(net, maxnorm)
-  for l in net
-    for hu = 1:size(l.w,1)
-      norms = sqrt(sum(view(l.w,hu,:) .^2.0))
+    for hu = 1:size(net[1].w,1)
+      norms = sqrt(sum(view(net[1].w,hu,:) .^2.0))
       if norms>maxnorm
-        for ii=1:size(l.w,2)
-          l.w[hu,ii] .*= maxnorm/norms
+        for ii=1:size(net[1].w,2)
+          net[1].w[hu,ii] .*= maxnorm/norms
         end
       end
     end
-  end
 end
 
 function sample_epoch(datasize, batch_size)
