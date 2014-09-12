@@ -204,7 +204,9 @@ function rmsproptrain(mlp::MLNN,
                   maxnorm::FloatingPoint=0.0,
                   loss=squared_loss,            
                   verbose::Bool=true,
-                  verboseiter::Int=100)
+                  verboseiter::Int=100,
+                  xval=Array[],
+                  tval=Array[])
   n = size(x,2)
   η, m, b = learning_rate, momentum_rate, batch_size
   e_old = Δw_old = epoch = 0.
@@ -212,7 +214,11 @@ function rmsproptrain(mlp::MLNN,
   f2 = convert(eltype(x), 2.0)
   f05 = convert(eltype(x), 0.5)
   stepadapt = ∇2 = mlp.net.^f0
-  e_new = loss(prop(mlp,x),t)
+  if isempty(xval)
+    e_new = loss(prop(mlp,x),t)
+  else
+    e_new = loss(prop(mlp,xval),tval)
+  end
 
   if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
       lossd = []
@@ -260,7 +266,11 @@ function rmsproptrain(mlp::MLNN,
 
     if verbose
       e_old = e_new
-      e_new = loss(prop(mlp,x),t)
+      if isempty(xval)
+        e_new = loss(prop(mlp,x),t)
+      else
+        e_new = loss(prop(mlp,xval),tval)
+      end
       println("epoch: $epoch\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
     end    
 
