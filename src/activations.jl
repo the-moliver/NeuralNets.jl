@@ -32,6 +32,24 @@ function srelud(x,idx)
 	a
 end
 
+function srelu10(x)
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = log(1. + exp(10.*x[ii]))./10
+	end
+	a, NaN
+end
+
+function srelu10d(x,idx)
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = 1 /(1. + exp(-10.*x[ii]))
+	end
+	a
+end
+
+
+
 function relu(x) 
 	a = similar(x)
 	for ii=1:prod(size(x))
@@ -102,6 +120,7 @@ derivs = Dict{Function, Function}([
                                    relu      => relud,
                                    donrelu   => donrelud,
                                    srelu     => srelud,
+                                   srelu10   => srelu10d,
                                    nrelu     => nrelud, 
                                    ident     => identd, 
                                    tanhact   => tanhactd,
