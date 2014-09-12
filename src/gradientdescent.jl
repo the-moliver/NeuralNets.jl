@@ -45,7 +45,7 @@ end
 
 function maxnormreg!(net, maxnorm)
     for hu = 1:size(net[1].w,1)
-      norms = sqrt(sum(view(net[1].w,hu,:) .^2.0))
+      norms = sqrt(sum(view(net[1].w,hu,:,:) .^2.0))
       if norms>maxnorm
         for ii=1:size(net[1].w,2)
           net[1].w[hu,ii] .*= maxnorm/norms
