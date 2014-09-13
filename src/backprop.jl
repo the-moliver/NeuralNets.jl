@@ -161,23 +161,23 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, D)  ## Backprop
     	l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, D[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, D.deltas[2:end])
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         #δ = errprop(l.w, δ)
-        δ = errprop!(l.w, δ, D[1])
+        δ = errprop!(l.w, δ, D.deltas[1])
         print("δ2")
         print(size(δ))
     else
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, D[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, D.deltas[2:end])
 
         δ = l.ad(h,idx) .* δ
 
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         #δ = errprop(l.w, δ)
-        δ = errprop!(l.w, δ, D[1])
+        δ = errprop!(l.w, δ, D.deltas[1])
         print("δ1")
         print(size(δ))
     end
