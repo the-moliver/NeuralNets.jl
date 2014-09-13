@@ -11,7 +11,7 @@ export logis, logisd, logissafe, logissafed, relu, relud, srelu, srelud, nrelu, 
 export squared_loss, squared_lossd, linear_loss, linear_lossd, hinge_loss, hinge_lossd, log_loss, log_lossd, quartic_loss, quartic_lossd, poisson_loss, poisson_lossd, xent_loss
  
 # types
-export MLP, NNLayer, TDMLP, TDNNLayer, MLNN
+export MLP, NNLayer, TDMLP, TDNNLayer, MLNN, Deltas, deltaLayer
 
 # multi-layer perceptrons
 include("losses.jl")
