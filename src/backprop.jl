@@ -147,6 +147,24 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
     return grad,δ
 end
 
+# backprop(net,x,t) returns array of gradients and error for net 
+# todo: make gradient unshift! section more generic
+function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas)  ## Backprop for non-cannonical activation/loss function pairs
+    if length(net) == 0   	# Final layer
+        δ  = lossd(x,t)     	# Error (δ) is simply difference with target
+        grad = T[]        	# Initialize weight gradient array
+    else                	# Intermediate layers
+        l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        δ = l.ad(h,idx) .* δ
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop!(l.w, δ, deltas[1])
+    end
+    return grad,δ
+end
+
 
 function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas)  ## Backprop for cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
@@ -159,7 +177,6 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas)  ## Bac
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
-        #δ = errprop(l.w, δ)
         δ = errprop!(l.w, δ, deltas[1])
 
     else
@@ -171,7 +188,6 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas)  ## Bac
         δ = l.ad(h,idx) .* δ
 
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
-        #δ = errprop(l.w, δ)
         δ = errprop!(l.w, δ, deltas[1])
 
     end
@@ -194,9 +210,7 @@ function errprop(w::Array{Float32,3}, d::Array{Float32,3})
 end
 
 function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
-	for ii=1:prod(size(deltas.d))
-		deltas.d[ii] = 0.
-	end
+	deltas.d[:] = 0.
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
 	    	deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
@@ -206,6 +220,20 @@ function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 end
 
 function errprop!(w::Array{Float32,2}, d::Array{Float32,2},deltas)
+	deltas.d[:] = w' * d
+end
+
+function errprop!(w::Array{Float64,3}, d::Array{Float64,3}, deltas)
+	deltas.d[:] = 0.
+	for ti=1:size(w,3)
+	    for ti2 = 1:size(d,3)
+	    	deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
+	    end
+	end
+	deltas.d
+end
+
+function errprop!(w::Array{Float64,2}, d::Array{Float64,2},deltas)
 	deltas.d[:] = w' * d
 end
 
