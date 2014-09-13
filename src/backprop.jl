@@ -122,6 +122,8 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop for cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
+		print("δ1")
+        print(size(δ))
         grad = T[]        	# Initialize weight gradient array
     elseif length(net) == 1                	# Last hidden layer
     	l = net[1]
@@ -130,6 +132,8 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
         grad,δ = backprop(net[2:end], y, t, lossd)
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         δ = errprop(l.w, δ)
+        print("δ2")
+        print(size(δ))
     else
         l = net[1]
         h = l * x           # Not a typo!
@@ -140,6 +144,8 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
 
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         δ = errprop(l.w, δ)
+        print("δ1")
+        print(size(δ))
     end
     return grad,δ
 end
