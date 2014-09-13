@@ -151,7 +151,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
 end
 
 
-function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, D)  ## Backprop for cannonical activation/loss function pairs
+function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas)  ## Backprop for cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
 		print("δ1")
@@ -161,23 +161,23 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, D)  ## Backprop
     	l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, D.deltas[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         #δ = errprop(l.w, δ)
-        δ = errprop!(l.w, δ, D.deltas[1])
+        δ = errprop!(l.w, δ, deltas[1])
         print("δ2")
         print(size(δ))
     else
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, D.deltas[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
 
         δ = l.ad(h,idx) .* δ
 
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         #δ = errprop(l.w, δ)
-        δ = errprop!(l.w, δ, D.deltas[1])
+        δ = errprop!(l.w, δ, deltas[1])
         print("δ1")
         print(size(δ))
     end
@@ -199,8 +199,8 @@ function errprop(w::Array{Float32,3}, d::Array{Float32,3})
 	δ
 end
 
-function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, D)
-	D.d[:]=0.
+function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
+	deltas.d[:]=0.
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
 	    	D.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
