@@ -45,6 +45,37 @@ function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
   x_batch,t_batch
 end
 
+function deltas_init(tdmlp::TDMLP, batch_size)
+  layer_delays = Int[]
+  nlayers = size(tdmlp.net,1)
+  for l in tdmlp.net
+    push!(layer_delays, size(l.w,3))
+  end
+  deltadelays = flipud(cumsum(flipud(layer_delays))-[0:length(layer_delays)-1])
+  cnt=0
+  elcnt=0
+  datatype = eltype(tdmlp.net[1].w)
+  buf = datatype[]
+  offs = Int[]
+  for l in tdmlp.net
+    cnt += 1
+    nd = size(l.w,2)*batch_size*deltadelays[cnt]
+    elcnt += nd
+    buf = [buf; zeros(datatype, nd,1)]
+    offs = [offs; elcnt]
+  end
+  buf = vec(buf)
+
+  ds = [deltaLayer(Array(eltype(buf),0,0,0)) for i=1:nlayers]
+
+  D = Deltas(ds, buf, offs)
+  for i=1:nlayers
+    toff = i > 1 ? offs[i-1] : 0
+    D.deltas[i].d = reshape_view(view(buf, toff+1:offs[i]), (size(tdmlp.net[i].w,2),batch_size,deltadelays[i]))
+  end
+  D
+end
+
 #function maxnormreg!(net, maxnorm)
 #  for l in net
 #    for hu = 1:size(l.w,1)
@@ -242,6 +273,7 @@ function rmsproptrain(mlp::MLNN,
   end
 
   x_batch,t_batch = mini_batch_init(x,t, [1:batch_size], mlp)              # Initialize mini-batch
+  D = deltas_init(mlp, batch_size)
     
   while epoch < maxiter
     epoch += 1
@@ -260,7 +292,7 @@ function rmsproptrain(mlp::MLNN,
         x_batch,t_batch = mini_batch!(x,t,x_batch,t_batch,fitpoints[:,i], mlp)   # Create mini-batch
         
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D)
 
         if i > 1 || epoch > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
