@@ -141,7 +141,7 @@ function calc_offsets(::Type{NNLayer}, dims)
 	offs
 end
 
-function MLP(genf::Function, layer_sizes::Vector{Int}, act::Vector{Function})
+function MLP(layer_sizes::Vector{Int}, act::Vector{Function}; datatype = Float32)
 	# some initializations
 	nlayers = length(layer_sizes) - 1
 	dims = [(layer_sizes[i+1],layer_sizes[i]) for i in 1:nlayers]
@@ -157,7 +157,13 @@ function MLP(genf::Function, layer_sizes::Vector{Int}, act::Vector{Function})
 	offs = calc_offsets(NNLayer, dims)
 
 	# our single data vector
-	buf = genf(offs[end])
+	buf = datatype[]
+	for ii = 1:length(layer_sizes)-1
+		nw = layer_sizes[ii]*layer_sizes[ii+1]
+		nb = layer_sizes[ii+1]
+		buf = [buf; 2.*(rand(datatype, nw,1)-.5).*sqrt(6.)./ sqrt(layer_sizes[ii] + layer_sizes[ii+1]); zeros(datatype, nb,1)]
+	end
+	buf = vec(buf)
 
 	net = [NNLayer(Array(eltype(buf),0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
