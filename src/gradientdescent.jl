@@ -11,21 +11,37 @@ function batch(b::Int,x::Array,t::Array)
     return x[:,index],t[:,index]
 end
 
-function mini_batch(x,t, fitpoints, mlp::MLP)
+function mini_batch_init(x,t, fitpoints, mlp::MLP)
   x_batch = x[:,fitpoints]
   t_batch = t[:,fitpoints]
 
   x_batch,t_batch
 end
 
-function mini_batch(x,t, fitpoints, tdmlp::TDMLP)
+function mini_batch_init(x,t, fitpoints, tdmlp::TDMLP)
   delays = tdmlp.delays
   x_batch = zeros(eltype(x),size(x,1), length(fitpoints), delays+1)
-  for i=0:delays
-    x_batch[:,:,i+1] = x[:,max(fitpoints-i,1)]
-  end
 
   t_batch = t[:,fitpoints]
+
+  x_batch,t_batch
+end
+
+function mini_batch!(x,t,x_batch,t_batch,fitpoints, mlp::MLP)
+  x_batch[:] = x[:,fitpoints]
+  t_batch[:] = t[:,fitpoints]
+
+  x_batch,t_batch
+end
+
+function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
+  delays = tdmlp.delays 
+  for i=0:delays
+    fitpoints .-= i
+    x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
+  end
+
+  t_batch[:] = t[:,fitpoints]
 
   x_batch,t_batch
 end
@@ -225,6 +241,8 @@ function rmsproptrain(mlp::MLNN,
   else
       lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
   end
+
+  x_batch,t_batch = mini_batch_init(x,t, [1:batch_size], mlp)              # Initialize mini-batch
     
   while epoch < maxiter
     epoch += 1
@@ -240,7 +258,7 @@ function rmsproptrain(mlp::MLNN,
     while i < size(fitpoints,2)
         i += 1
 
-        x_batch,t_batch = mini_batch(x,t, fitpoints[:,i], mlp)               # Create mini-batch
+        x_batch,t_batch = mini_batch!(x,t,x_batch,t_batch,fitpoints[:,i], mlp)   # Create mini-batch
         
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
