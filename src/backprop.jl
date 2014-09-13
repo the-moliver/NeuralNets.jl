@@ -205,6 +205,10 @@ function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 	deltas.d
 end
 
+function errprop!(w::Array{Float32,2}, d::Array{Float32,2},deltas)
+	deltas.d[:] = w' * d
+end
+
 function errprop(w::Array{Float64,2}, d::Array{Float64,2})
 	δ = w' * d
 end

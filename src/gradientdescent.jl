@@ -64,6 +64,20 @@ function deltas_init(tdmlp::TDMLP, batch_size)
   D
 end
 
+function deltas_init(mlp::MLP, batch_size)
+  nlayers = size(mlp.net,1)
+
+  datatype = eltype(mlp.net[1].w)
+
+  ds = [deltaLayer(Array(datatype,0,0)) for i=1:nlayers]
+
+  D = Deltas(ds)
+  for i=1:nlayers
+    D.deltas[i].d = zeros(datatype, size(mlp.net[i].w,2),batch_size)
+  end
+  D
+end
+
 #function maxnormreg!(net, maxnorm)
 #  for l in net
 #    for hu = 1:size(l.w,1)
