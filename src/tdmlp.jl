@@ -24,8 +24,6 @@ end
 
 type Deltas
     deltas::Vector{deltaLayer}
-    buf::AbstractVector      # in-place data store
-    offs::Vector{Int}    # indices into in-place store
 end
 
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer

@@ -52,26 +52,14 @@ function deltas_init(tdmlp::TDMLP, batch_size)
     push!(layer_delays, size(l.w,3))
   end
   deltadelays = flipud(cumsum(flipud(layer_delays))-[0:length(layer_delays)-1])
-  cnt=0
-  elcnt=0
+
   datatype = eltype(tdmlp.net[1].w)
-  buf = datatype[]
-  offs = Int[]
-  for l in tdmlp.net
-    cnt += 1
-    nd = size(l.w,2)*batch_size*deltadelays[cnt]
-    elcnt += nd
-    buf = [buf; zeros(datatype, nd,1)]
-    offs = [offs; elcnt]
-  end
-  buf = vec(buf)
 
-  ds = [deltaLayer(Array(eltype(buf),0,0,0)) for i=1:nlayers]
+  ds = [deltaLayer(Array(datatype,0,0,0)) for i=1:nlayers]
 
-  D = Deltas(ds, buf, offs)
+  D = Deltas(ds)
   for i=1:nlayers
-    toff = i > 1 ? offs[i-1] : 0
-    D.deltas[i].d = reshape_view(view(buf, toff+1:offs[i]), (size(tdmlp.net[i].w,2),batch_size,deltadelays[i])) .+ 0.
+    D.deltas[i].d = zeros(datatype, size(tdmlp.net[i].w,2),batch_size,deltadelays[i])
   end
   D
 end
