@@ -256,8 +256,7 @@ function rmsproptrain(mlp::MLNN,
 
     while i < size(fitpoints,2)
         i += 1
-        print(size(x_batch))
-        print(size(t_batch))
+        
         x_batch,t_batch = mini_batch!(x,t,x_batch,t_batch,fitpoints[:,i], mlp)   # Create mini-batch
         
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
