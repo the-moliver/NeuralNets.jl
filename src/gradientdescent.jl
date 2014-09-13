@@ -71,7 +71,7 @@ function deltas_init(tdmlp::TDMLP, batch_size)
   D = Deltas(ds, buf, offs)
   for i=1:nlayers
     toff = i > 1 ? offs[i-1] : 0
-    D.deltas[i].d = reshape_view(view(buf, toff+1:offs[i]), (size(tdmlp.net[i].w,2),batch_size,deltadelays[i]))
+    D.deltas[i].d = reshape_view(view(buf, toff+1:offs[i]), (size(tdmlp.net[i].w,2),batch_size,deltadelays[i])) .+ 0.
   end
   D
 end
