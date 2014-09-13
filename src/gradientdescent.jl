@@ -28,8 +28,8 @@ function mini_batch_init(x,t, fitpoints, tdmlp::TDMLP)
 end
 
 function mini_batch!(x,t,x_batch,t_batch,fitpoints, mlp::MLP)
-  x_batch[:] = x[:,fitpoints]
-  t_batch[:] = t[:,fitpoints]
+  x_batch[:,:] = x[:,fitpoints]
+  t_batch[:,:] = t[:,fitpoints]
 
   x_batch,t_batch
 end
@@ -41,7 +41,7 @@ function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
     x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
   end
 
-  t_batch[:] = t[:,fitpoints]
+  t_batch[:,:] = t[:,fitpoints]
 
   x_batch,t_batch
 end
