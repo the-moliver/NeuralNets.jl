@@ -200,13 +200,15 @@ function errprop(w::Array{Float32,3}, d::Array{Float32,3})
 end
 
 function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
-	deltas.d[:]=0.
+	for ii=1:prod(size(deltas.d))
+		deltas.d[ii] = 0.
+	end
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
-	    	D.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
+	    	deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
 	    end
 	end
-	D.d
+	deltas.d
 end
 
 function errprop(w::Array{Float64,2}, d::Array{Float64,2})
