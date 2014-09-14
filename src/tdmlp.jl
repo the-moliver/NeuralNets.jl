@@ -54,10 +54,8 @@ end
 *(l::TDNNLayer, x::Array{Float32,3}) = begin
 	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(eltype(x), size(l.w,1), size(x,2), nd);
-	for ti = 1:nd
-    	for ti2 = 1:size(l.w,3)
-      		@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
-    	end
+	for ti = 1:nd, ti2 = 1:size(l.w,3)
+      	@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
   	end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
