@@ -54,7 +54,7 @@ end
 *(l::TDNNLayer, x::Array{Float32,3}) = begin
 	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(eltype(x), size(l.w,1), size(x,2), nd);
-	rg =size(1.w,1)*size(x,2);
+	rg =size(l.w,1)*size(x,2);
 	for ti = 1:nd, ti2 = 1:size(l.w,3)
       	#@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
         Base.LinAlg.BLAS.axpy!(1,view(l.w,:,:,ti2)*x[:,:,ti+ti2-1],range(1,rg),z[:,:,ti],range(1,rg))
