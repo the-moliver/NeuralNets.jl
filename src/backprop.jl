@@ -213,7 +213,9 @@ function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 	deltas.d[:] = 0.
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
-	    	@inbounds deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
+	    	@simd for dd = 1:size(d,2)
+	    		@inbounds deltas.d[:,dd,ti+ti2-1] += w[:,:,ti]'*d[:,dd,ti2];
+	    	end	
 	    end
 	end
 	deltas.d
