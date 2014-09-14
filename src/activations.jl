@@ -4,8 +4,8 @@ function logis(x)
 end
 logisd(x,idx) = exp(x) ./ ((1. .+ exp(x)).^2.)
 
-function logissafe(x) 
-	logis(x), NaN
+function logissafe(x)
+	logis(x)
 end
 logissafed(x,idx) = logisd(min(x,400.0))
 
@@ -50,7 +50,7 @@ end
 
 
 
-function relu(x) 
+function relu(x)
 	a = similar(x)
 	for ii=1:prod(size(x))
 		a[ii] = x[ii] > 0. ? x[ii] : 0.
@@ -58,7 +58,7 @@ function relu(x)
 	a,NaN
 end
 
-function relud(x,idx) 
+function relud(x,idx)
 	a = similar(x)
 	for ii=1:prod(size(x))
 		a[ii] = x[ii] > 0. ? 1.0 : 0.0
@@ -66,7 +66,7 @@ function relud(x,idx)
 	a
 end
 
-function nrelu(x) 
+function nrelu(x)
 	a = similar(x)
 	for ii=1:prod(size(x))
 		a[ii] = x[ii] > 0. ? max(0. , x[ii] + sqrt(x[ii]).*randn()) : 0.
@@ -77,7 +77,7 @@ end
 
 nrelud(x,idx) = relud(x,idx)
 
-function donrelu(x) 
+function donrelu(x)
 	a = similar(x)
 	for ii=1:prod(size(x))
 		a[ii] = x[ii] > 0. ? max(0. , x[ii] + sqrt(x[ii]).*randn()) : 0.
@@ -88,7 +88,7 @@ function donrelu(x)
 	a, idx
 end
 
-function donrelud(x,idx) 
+function donrelud(x,idx)
 	a = similar(x)
 	for ii=1:prod(size(x))
 		a[ii] = x[ii] > 0. ? 1.0 : 0.0
@@ -98,7 +98,7 @@ function donrelud(x,idx)
 	a
 end
 
-function ident(x) 
+function ident(x)
 	x, NaN
 end
 identd(x,idx) = 1.
@@ -121,8 +121,8 @@ derivs = Dict{Function, Function}([
                                    donrelu   => donrelud,
                                    srelu     => srelud,
                                    srelu10   => srelu10d,
-                                   nrelu     => nrelud, 
-                                   ident     => identd, 
+                                   nrelu     => nrelud,
+                                   ident     => identd,
                                    tanhact   => tanhactd,
                                    expact    => expactd
                                    ])
@@ -130,7 +130,7 @@ derivs = Dict{Function, Function}([
 
 # dictionary of cannonical activation/loss function pairs
 cannonical = Dict{Function, Function}([
-                                   logis     => log_loss, 
+                                   logis     => log_loss,
                                    logissafe => log_loss,
                                    ident     => squared_loss,
                                    expact    => poisson_loss,
