@@ -210,7 +210,7 @@ end
 function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 	deltas.d[:] = 0.
 	for ti=1:size(w,3), ti2 = 1:size(d,3)
-    	Base.LinAlg.BLAS.gemm!('T', 'N', one(Float32), w[:,:,ti], d[:,:,ti2], one(Float32), view(deltas.d,:,:,ti+ti2-1))
+    	Base.LinAlg.BLAS.gemm!('T', 'N', one(Float32), view(w,:,:,ti), view(d,:,:,ti2), one(Float32), view(deltas.d,:,:,ti+ti2-1))
 	end
 	deltas.d
 end
