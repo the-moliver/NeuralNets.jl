@@ -38,8 +38,12 @@ function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
   delays = tdmlp.delays 
   t_batch[:,:] = t[:,fitpoints]
   for i=0:delays
-    x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
+    #x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
+    for ii = [1:length(fitpoints)]
+      x_batch[:,ii,i+1] = view(x,:,fitpoints[ii])
+    end
     fitpoints .-= 1
+    fitpoints = max(fitpoints,1)
   end
 
   x_batch,t_batch
