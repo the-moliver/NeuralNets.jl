@@ -209,11 +209,8 @@ end
 
 function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 	deltas.d[:] = 0.
-  #rg =size(w,2)*size(d,2);
 	for ti=1:size(w,3), ti2 = 1:size(d,3)
-	    #@inbounds deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
-    #Base.LinAlg.BLAS.axpy!(1,w[:,:,ti]'*d[:,:,ti2],range(1,rg),deltas.d[:,:,ti+ti2-1],range(1,rg))
-    Base.LinAlg.BLAS.gemm!('T', 'N', one(Float32), w[:,:,ti], d[:,:,ti2], one(Float32), deltas.d[:,:,ti+ti2-1])
+    	Base.LinAlg.BLAS.gemm!('T', 'N', one(Float32), w[:,:,ti], d[:,:,ti2], one(Float32), deltas.d[:,:,ti+ti2-1])
 	end
 	deltas.d
 end
@@ -224,10 +221,8 @@ end
 
 function errprop!(w::Array{Float64,3}, d::Array{Float64,3}, deltas)
 	deltas.d[:] = 0.
-	for ti=1:size(w,3)
-	    for ti2 = 1:size(d,3)
-	    	deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
-	    end
+	for ti=1:size(w,3), ti2 = 1:size(d,3)
+    	Base.LinAlg.BLAS.gemm!('T', 'N', one(Float64), w[:,:,ti], d[:,:,ti2], one(Float64), deltas.d[:,:,ti+ti2-1])
 	end
 	deltas.d
 end
