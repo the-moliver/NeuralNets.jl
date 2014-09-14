@@ -101,7 +101,7 @@ function backprop!{T}(net::Vector{T}, stor::Vector{T}, x, t)
 	end
 end
 
-# backprop(net,x,t) returns array of gradients and error for net 
+# backprop(net,x,t) returns array of gradients and error for net
 # todo: make gradient unshift! section more generic
 function backprop{T}(net::Vector{T}, x, t, lossd::Function)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
@@ -147,7 +147,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop fo
     return grad,δ
 end
 
-# backprop(net,x,t) returns array of gradients and error for net 
+# backprop(net,x,t) returns array of gradients and error for net
 # todo: make gradient unshift! section more generic
 function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
@@ -209,8 +209,10 @@ end
 
 function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 	deltas.d[:] = 0.
+  rg =size(w,2)*size(d,2);
 	for ti=1:size(w,3), ti2 = 1:size(d,3)
-	    @inbounds deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
+	    #@inbounds deltas.d[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
+    Base.LinAlg.BLAS.axpy!(1,w[:,:,ti]'*d[:,:,ti2],range(1,rg),deltas.d[:,:,ti+ti2-1],range(1,rg))
 	end
 	deltas.d
 end
