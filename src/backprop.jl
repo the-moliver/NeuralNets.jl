@@ -211,10 +211,12 @@ end
 
 function errprop!(w::Array{Float32,3}, d::Array{Float32,3}, deltas)
 	deltas.d[:] = 0.
+	tmp = zeros(Float32,size(w,2),size(d,2))
 	for ti=1:size(w,3)
 	    for ti2 = 1:size(d,3)
-	    	for dd = 1:size(d,2)
-	    		deltas.d[:,dd,ti+ti2-1] += w[:,:,ti]'*d[:,dd,ti2];
+	    	tmp = w[:,:,ti]'*d[:,:,ti2];
+	    	for dd=1:size(d,2)
+	    		deltas.d[:,dd,ti+ti2-1] += tmp[:,dd];
 	    	end
 	    end
 	end
