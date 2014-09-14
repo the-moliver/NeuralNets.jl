@@ -55,7 +55,8 @@ end
 	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(eltype(x), size(l.w,1), size(x,2), nd);
 	for ti = 1:nd, ti2 = 1:size(l.w,3)
-      	@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
+      	#@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
+        Base.LinAlg.BLAS.axpy!(1,view(l.w,:,:,ti2)*x[:,:,ti+ti2-1],range(1,rg),z[:,:,ti],range(1,rg))
   	end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
@@ -132,7 +133,7 @@ end
 											        l.b = l.b .+ c
 											    end
 											    net2
-											end											
+											end
 .-(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
 												net2=deepcopy(net)
 												for l in net2
@@ -148,7 +149,7 @@ end
 											        l.b = c .- l.b
 											    end
 											    net2
-											end											
+											end
 import Base.sign
 sign(l::TDNNLayer) = TDNNLayer(sign(l.w), sign(l.b), l.a, l.ad)
 
