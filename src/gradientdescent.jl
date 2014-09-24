@@ -35,7 +35,7 @@ function mini_batch!(x,t,x_batch,t_batch,fitpoints, mlp::MLP)
 end
 
 function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
-  delays = tdmlp.delays 
+  delays = tdmlp.delays
   t_batch[:,:] = t[:,fitpoints]
   for i=0:delays
     #x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
@@ -82,29 +82,29 @@ function deltas_init(mlp::MLP, batch_size)
   D
 end
 
+function maxnormreg!(net, maxnorm)
+ for l = 1:length(net)-1
+   for hu = 1:size(net[l].w,1)
+     norms = sqrt(sum(view(net[l].w,hu,:) .^2.0))
+     if norms>maxnorm
+       for ii=1:size(net[l].w,2)
+         net[l].w[hu,ii] .*= maxnorm/norms
+       end
+     end
+   end
+ end
+end
+
 #function maxnormreg!(net, maxnorm)
-#  for l in net
-#    for hu = 1:size(l.w,1)
-#      norms = sqrt(sum(view(l.w,hu,:) .^2.0))
+#    for hu = 1:size(net[1].w,1)
+#      norms = sqrt(sum(view(net[1].w,hu,:,:) .^2.0))
 #      if norms>maxnorm
-#        for ii=1:size(l.w,2)
-#          l.w[hu,ii] .*= maxnorm/norms
+#        for ii=1:size(net[1].w,2)
+#          net[1].w[hu,ii] .*= maxnorm/norms
 #        end
 #      end
 #    end
-#  end
 #end
-
-function maxnormreg!(net, maxnorm)
-    for hu = 1:size(net[1].w,1)
-      norms = sqrt(sum(view(net[1].w,hu,:,:) .^2.0))
-      if norms>maxnorm
-        for ii=1:size(net[1].w,2)
-          net[1].w[hu,ii] .*= maxnorm/norms
-        end
-      end
-    end
-end
 
 function sample_epoch(datasize, batch_size)
     fitpoints = [1:datasize]
@@ -130,7 +130,7 @@ function gdmtrain(mlp::MLNN,
                   maxiter::Int=1000,
                   tol::Real=1e-5,
                   learning_rate=.3,
-                  momentum_rate=.6,             
+                  momentum_rate=.6,
                   eval::Int=10,
                   loss=squared_loss,
                   verbose::Bool=true,
@@ -152,8 +152,8 @@ function gdmtrain(mlp::MLNN,
         x_batch,t_batch = batch(b,x,t)
         mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
-        Δw_new = -η*∇                     # calculate Δ weights   
-        mlp.net = mlp.net .+ Δw_new       # update weights                       
+        Δw_new = -η*∇                     # calculate Δ weights
+        mlp.net = mlp.net .+ Δw_new       # update weights
         Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
 
         if i % eval == 0  # recalculate loss every eval number iterations
@@ -163,7 +163,7 @@ function gdmtrain(mlp::MLNN,
         end
         if verbose && i % verboseiter == 0
             println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
-        end        
+        end
     end
     convgstr = converged ? "converged" : "didn't converge"
     println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
@@ -186,7 +186,7 @@ end
 function adatrain(mlp::MLNN,
                   x,
                   t;
-                  batch_size=size(x,2),                  
+                  batch_size=size(x,2),
                   maxiter::Int=1000,
                   tol::Real=1e-5,
                   learning_rate=.3,
@@ -254,7 +254,7 @@ function rmsproptrain(mlp::MLNN,
                   maxadapt::FloatingPoint=5.0,
                   sqgradupdate_rate::FloatingPoint=.1,
                   maxnorm::FloatingPoint=0.0,
-                  loss=squared_loss,            
+                  loss=squared_loss,
                   verbose::Bool=true,
                   verboseiter::Int=100,
                   xval=Array[],
@@ -280,7 +280,7 @@ function rmsproptrain(mlp::MLNN,
 
   x_batch,t_batch = mini_batch_init(x,t, [1:batch_size], mlp)              # Initialize mini-batch
   D = deltas_init(mlp, batch_size)
-    
+
   while epoch < maxiter
     epoch += 1
 
@@ -294,9 +294,9 @@ function rmsproptrain(mlp::MLNN,
 
     while i < size(fitpoints,2)
         i += 1
-        
+
         x_batch,t_batch = mini_batch!(x,t,x_batch,t_batch,fitpoints[:,i], mlp)   # Create mini-batch
-        
+
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas)
 
@@ -316,7 +316,7 @@ function rmsproptrain(mlp::MLNN,
         end
 
         Δw_old = Δw_new .+ m.*Δw_old                                         # keep track of all weight updates
-    
+
     end
 
     if verbose
@@ -327,7 +327,7 @@ function rmsproptrain(mlp::MLNN,
         e_new = loss(prop(mlp,xval),tval)
       end
       println("epoch: $epoch\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
-    end    
+    end
 
   end
 
