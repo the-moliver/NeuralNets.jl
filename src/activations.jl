@@ -32,22 +32,30 @@ function srelud(x,idx)
 	a
 end
 
-function srelu10(x)
+function sreluk(x,k)
 	a = similar(x)
 	for ii=1:prod(size(x))
-		a[ii] = log(1. + exp(10.*x[ii]))./10
+		a[ii] = log(1. + exp(k.*x[ii]))./k
 	end
 	a, NaN
 end
 
-function srelu10d(x,idx)
+function srelukd(x,idx,k)
 	a = similar(x)
 	for ii=1:prod(size(x))
-		a[ii] = 1 /(1. + exp(-10.*x[ii]))
+		a[ii] = 1 /(1. + exp(-k.*x[ii]))
 	end
 	a
 end
 
+# srelu10(x) = sreluk(x,10)
+# srelu10d(x,idx) = srelukd(x,idx,10)
+# merge!(derivs, [srelu10   => srelu10d])
+
+
+# srelu5(x) = sreluk(x,5)
+# srelu5d(x,idx) = srelukd(x,idx,5)
+# merge!(derivs, [srelu5   => srelu5d])
 
 
 function relu(x)
@@ -98,6 +106,36 @@ function donrelud(x,idx)
 	a
 end
 
+
+function dopnrelu(x,p)
+	a = similar(x)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? max(0. , x[ii] + sqrt(x[ii]).*randn()) : 0.
+	end
+	idx = randperm(size(a,1))
+  li = length(idx)
+  p1 = round((1 - p) .* li)
+	a[idx[1:p1],:,:] = 0.
+	a[idx[(p1+1):end],:,:] .*= li./(li-p1)
+	a, idx
+end
+
+function dopnrelud(x,idx,p)
+	a = similar(x)
+  li = length(idx)
+  p1 = round((1 - p) .* li)
+	for ii=1:prod(size(x))
+		a[ii] = x[ii] > 0. ? 1.0 : 0.0
+	end
+	a[idx[1:p1],:,:] = 0.
+	a[idx[(p1+1):end],:,:] .*= li./(li-p1)
+	a
+end
+
+# do8nrelu(x) = dopnrelu(x,.8)
+# do8nrelud(x,idx) = dopnrelud(x,idx,.8)
+# merge!(derivs, [do8nrelu   => do8nrelud])
+
 function ident(x)
 	x, NaN
 end
@@ -120,7 +158,6 @@ derivs = Dict{Function, Function}([
                                    relu      => relud,
                                    donrelu   => donrelud,
                                    srelu     => srelud,
-                                   srelu10   => srelu10d,
                                    nrelu     => nrelud,
                                    ident     => identd,
                                    tanhact   => tanhactd,
