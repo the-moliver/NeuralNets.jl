@@ -6,6 +6,10 @@ function prop(net, x)
 	end
 end
 
+function prop(net, x, delays::Int, gain)
+  net[end].a(gain.* (net[end] * prop(net[1:end-1], x, delays)))[1]
+end
+
 function prop(net, x, delays::Int)
 	if length(net) == 0 # Input layer
 		x
@@ -57,7 +61,7 @@ function prop(tdmlp::TDMLP,x)
 			end
 		end
 	end
-	a = prop(tdmlp.net,x,tdmlp.delays)
+	a = prop(tdmlp.net,x,tdmlp.delays,tdmlp.gain)
 	if tdmlp.trained
 		for l in tdmlp.net
 			l.a = shift!(acts)
@@ -220,7 +224,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas, weights
 
         grad = T[]        	# Initialize weight gradient array
     elseif length(net) == 1                	# Last hidden layer
-    	l = net[1]
+    	  l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])

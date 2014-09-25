@@ -16,6 +16,7 @@ type TDMLP <: MLNN
     offs::Vector{Int}    # indices into in-place store
     delays::Int    # total number of lags needed for forward pass
     trained::Bool
+    gain::FloatingPoint
 end
 
 type deltaLayer{T}
@@ -193,7 +194,7 @@ function calc_offsets(::Type{TDNNLayer}, dims)
 	offs
 end
 
-function TDMLP(layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function}; datatype = Float32)
+function TDMLP(layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{Function}; gain=1., datatype = Float32)
 	# some initializations
 	nlayers = length(layer_sizes) - 1
 	dims = [(layer_sizes[i+1],layer_sizes[i],layer_delays[i]) for i in 1:nlayers]
@@ -222,7 +223,7 @@ function TDMLP(layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{
 
 	net = [TDNNLayer(Array(eltype(buf),0,0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
-	tdmlp = TDMLP(net, dims, buf, offs, delays, false)
+	tdmlp = TDMLP(net, dims, buf, offs, delays, false, gain)
 	unflatten_net!(tdmlp, buf)
 
 	tdmlp
