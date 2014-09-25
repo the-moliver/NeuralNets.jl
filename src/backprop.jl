@@ -195,6 +195,53 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas)  ## Bac
 end
 
 
+# backprop(net,x,t) returns array of gradients and error for net
+# todo: make gradient unshift! section more generic
+function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas, weights, gain)  ## Backprop for non-cannonical activation/loss function pairs
+    if length(net) == 0   	# Final layer
+        δ  = gain.*(weights.*lossd(x,t))     	# Error (δ) is simply difference with target
+        grad = T[]        	# Initialize weight gradient array
+    else                	# Intermediate layers
+        l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        δ = l.ad(h,idx) .* δ
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop!(l.w, δ, deltas[1])
+    end
+    return grad,δ
+end
+
+
+function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas, weights, gain)  ## Backprop for cannonical activation/loss function pairs
+    if length(net) == 0   	# Final layer
+        δ  = gain.*(weights.*(x .- t))     	# Error (δ) is simply difference with target
+
+        grad = T[]        	# Initialize weight gradient array
+    elseif length(net) == 1                	# Last hidden layer
+    	l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop!(l.w, δ, deltas[1])
+
+    else
+        l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+
+        δ = l.ad(h,idx) .* δ
+
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        δ = errprop!(l.w, δ, deltas[1])
+
+    end
+    return grad,δ
+end
+
 function errprop(w::Array{Float32,2}, d::Array{Float32,2})
 	δ = w' * d
 end

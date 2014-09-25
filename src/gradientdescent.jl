@@ -27,6 +27,48 @@ function mini_batch_init(x,t, fitpoints, tdmlp::TDMLP)
   x_batch,t_batch
 end
 
+function mini_batch_init(x,t,w, fitpoints, mlp::MLP)
+  x_batch = x[:,fitpoints]
+  t_batch = t[:,fitpoints]
+  w_batch = w[:,fitpoints]
+
+  x_batch,t_batch,w_batch
+end
+
+function mini_batch_init(x,t,w, fitpoints, tdmlp::TDMLP)
+  delays = tdmlp.delays
+  x_batch = zeros(eltype(x),size(x,1), length(fitpoints), delays+1)
+
+  t_batch = t[:,fitpoints]
+  w_batch = w[:,fitpoints]
+
+  x_batch,t_batch,w_batch
+end
+
+function mini_batch!(x,t,w,x_batch,t_batch,w_batch,fitpoints, mlp::MLP)
+  x_batch[:,:] = x[:,fitpoints]
+  t_batch[:,:] = t[:,fitpoints]
+  w_batch[:,:] = w[:,fitpoints]
+
+  x_batch,t_batch,w_batch
+end
+
+function mini_batch!(x,t,w,x_batch,t_batch,w_batch,fitpoints, tdmlp::TDMLP)
+  delays = tdmlp.delays
+  t_batch[:,:] = t[:,fitpoints]
+  w_batch[:,:] = w[:,fitpoints]
+  for i=0:delays
+    #x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
+    for ii = [1:length(fitpoints)]
+      x_batch[:,ii,i+1] = view(x,:,fitpoints[ii])
+    end
+    fitpoints .-= 1
+    fitpoints = max(fitpoints,1)
+  end
+
+  x_batch,t_batch,w_batch
+end
+
 function mini_batch!(x,t,x_batch,t_batch,fitpoints, mlp::MLP)
   x_batch[:,:] = x[:,fitpoints]
   t_batch[:,:] = t[:,fitpoints]
@@ -255,6 +297,8 @@ function rmsproptrain(mlp::MLNN,
                   sqgradupdate_rate::FloatingPoint=.1,
                   maxnorm::FloatingPoint=0.0,
                   loss=squared_loss,
+                  gain=.1,
+                  weights=Array[],
                   verbose::Bool=true,
                   verboseiter::Int=100,
                   xval=Array[],
@@ -266,6 +310,10 @@ function rmsproptrain(mlp::MLNN,
   f2 = convert(eltype(x), 2.0)
   f05 = convert(eltype(x), 0.5)
   stepadapt = ∇2 = mlp.net.^f0
+   if isempty(weights)
+    weights=ones(eltype(t),size(t))
+  end
+
   if isempty(xval)
     e_new = loss(prop(mlp,x),t)
   else
@@ -278,7 +326,7 @@ function rmsproptrain(mlp::MLNN,
       lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
   end
 
-  x_batch,t_batch = mini_batch_init(x,t, [1:batch_size], mlp)              # Initialize mini-batch
+  x_batch,t_batch,w_batch = mini_batch_init(x,t,weights, [1:batch_size], mlp)              # Initialize mini-batch
   D = deltas_init(mlp, batch_size)
 
   while epoch < maxiter
@@ -295,10 +343,10 @@ function rmsproptrain(mlp::MLNN,
     while i < size(fitpoints,2)
         i += 1
 
-        x_batch,t_batch = mini_batch!(x,t,x_batch,t_batch,fitpoints[:,i], mlp)   # Create mini-batch
+        x_batch,t_batch,w_batch = mini_batch!(x,t,weights,x_batch,t_batch,w_batch,fitpoints[:,i], mlp)   # Create mini-batch
 
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas)
+        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas,w_batch,gain)
 
         if i > 1 || epoch > 1
           stepadapt .*= (1.0 .-(stepadapt_rate.*(sign(∇) .* sign(Δw_old))))  # step size adaptation
