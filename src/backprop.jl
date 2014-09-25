@@ -33,7 +33,7 @@ function prop(mlp::MLP,x)
 		acts = Function[]
 		for l in mlp.net
 			push!(acts,l.a)
-			if l.a == nrelu || l.a == donrelu
+			if string(Base.function_name(l.a))[end-3:end]=="relu"
 				l.a = relu
 			end
 		end
@@ -52,7 +52,7 @@ function prop(tdmlp::TDMLP,x)
 		acts = Function[]
 		for l in tdmlp.net
 			push!(acts,l.a)
-			if l.a == nrelu || l.a == donrelu
+			if string(Base.function_name(l.a))[end-3:end]=="relu"
 				l.a = relu
 			end
 		end
