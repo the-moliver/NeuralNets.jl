@@ -331,7 +331,7 @@ function finite_diff(mlp,x,t,loss)
     w1[:] = deepcopy(w);
     w1[ii] = w1[ii] + 1e-8;
     unflatten_net!(mlp, w1)
-    y=mprop(mlp,x)
+    y=mprop(mlp.net,x)
     #y=prop(mlp,x)
 
     err1 = loss(y,t);
@@ -340,7 +340,7 @@ function finite_diff(mlp,x,t,loss)
     w1[ii] = w1[ii] - 1e-8;
     unflatten_net!(mlp, w1)
     #y=prop(mlp,x)
-    y=mprop(mlp,x)
+    y=mprop(mlp.net,x)
     err2 = loss(y,t);
 
     g[ii] =(err1 - err2)./2e-8;
