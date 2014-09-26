@@ -305,3 +305,28 @@ function errprop(w::Array{Float64,3}, d::Array{Float64,3})
 	end
 	δ
 end
+
+
+function finiteDiffGrad(mlp,x,t,loss)
+  w = flatten_net(mlp)
+  w1 = deepcopy(w)
+
+  g = zeros(size(w));
+
+  for ii = 1:length(w)
+    w1[:] = deepcopy(w);
+    w1[ii] = w1[ii] + 1e-8;
+    mlp = unflatten_net!(mlp, w1)
+    y=prop(mlp,x)
+    err1 = loss(y,t);
+
+    w1[:] = deepcopy(w);
+    w1[ii] = w1[ii] - 1e-8;
+    mlp = unflatten_net!(mlp, w1)
+    y=prop(mlp,x)
+    err2 = loss(y,t);
+
+    g(ii) =(err1 - err2)./2e-8;
+  end
+  g
+end

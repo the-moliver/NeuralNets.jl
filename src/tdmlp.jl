@@ -244,3 +244,13 @@ function unflatten_net!(tdmlp::TDMLP, buf::AbstractVector)
 		tdmlp.net[i].b = view(buf, toff+1:toff+tdims[1])
 	end
 end
+
+
+function flatten_net(tdmlp)
+
+  flat = Array[]
+	for i = 1 : length(tdmlp.net)
+    flat = [flat; vec(tdmlp.net[i].w); tdmlp.net[i].b]
+	end
+  flat
+end
