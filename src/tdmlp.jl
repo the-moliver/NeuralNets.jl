@@ -33,10 +33,11 @@ end
 *(l::TDNNLayer, x::Array{Float64,3}) = begin
 	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(eltype(x), size(l.w,1), size(x,2), nd);
-	for ti = 1:nd
-    	for ti2 = 1:size(l.w,3)
-      		z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
-    	end
+	#rg =size(l.w,1)*size(x,2);
+	for ti = 1:nd, ti2 = 1:size(l.w,3)
+      	#@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
+        #Base.LinAlg.BLAS.axpy!(1,view(l.w,:,:,ti2)*x[:,:,ti+ti2-1],range(1,rg),z[:,:,ti],range(1,rg))
+      Base.LinAlg.BLAS.gemm!('N', 'N', one(Float64), view(l.w,:,:,ti2), view(x,:,:,ti+ti2-1), one(Float64), view(z,:,:,ti))
   	end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
@@ -246,11 +247,20 @@ function unflatten_net!(tdmlp::TDMLP, buf::AbstractVector)
 end
 
 
-function flatten_net(tdmlp)
+function flatten_net(tdmlp::TDMLP)
 
   flat = Array[]
 	for i = 1 : length(tdmlp.net)
     flat = [flat; vec(tdmlp.net[i].w); tdmlp.net[i].b]
+	end
+  flat
+end
+
+function flatten_net(net)
+
+  flat = Array[]
+	for i = 1 : length(net)
+    flat = [flat; vec(net[i].w); net[i].b]
 	end
   flat
 end

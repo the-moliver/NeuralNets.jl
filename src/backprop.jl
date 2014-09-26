@@ -306,6 +306,20 @@ function errprop(w::Array{Float64,3}, d::Array{Float64,3})
 	δ
 end
 
+function mprop{T}(net::Vector{T}, x)  ## Backprop for non-cannonical activation/loss function pairs
+    if length(net) == 1                	# Last hidden layer
+    	  l = net[1]
+        h = (l * x)           # Not a typo!
+        y,idx = l.a(h)
+    else
+        l = net[1]
+        h = l * x           # Not a typo!
+        y,idx = l.a(h)
+        y = mprop(net[2:end], y)
+    end
+    return y
+end
+
 
 function finite_diff(mlp,x,t,loss)
   w = flatten_net(mlp)
@@ -317,13 +331,16 @@ function finite_diff(mlp,x,t,loss)
     w1[:] = deepcopy(w);
     w1[ii] = w1[ii] + 1e-8;
     unflatten_net!(mlp, w1)
-    y=prop(mlp,x)
+    y=mprop(mlp,x)
+    #y=prop(mlp,x)
+
     err1 = loss(y,t);
 
     w1[:] = deepcopy(w);
     w1[ii] = w1[ii] - 1e-8;
     unflatten_net!(mlp, w1)
-    y=prop(mlp,x)
+    #y=prop(mlp,x)
+    y=mprop(mlp,x)
     err2 = loss(y,t);
 
     g[ii] =(err1 - err2)./2e-8;
