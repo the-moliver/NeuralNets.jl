@@ -2,18 +2,18 @@
 
 # y = predicted value, t = expected value
 
-squared_loss(y, t) = 0.5 * norm(y .- t).^2. # L(y, t) = .5 || y - t ||^2 = .5 (y - t)^2
+squared_loss(y, t) = 0.5 * nansum((y .- t).^2.) # L(y, t) = .5 || y - t ||^2 = .5 (y - t)^2
 squared_lossd(y, t) = y .- t # d/dx L(y, t) = (y - t)
 
 
-xent_loss(y, t) = -sum(t.*log(max(y, eps(typeof(y[1])))))  ## fix to prevent log(0)
+xent_loss(y, t) = -nansum(t.*log(max(y, eps(typeof(y[1])))))  ## fix to prevent log(0)
 
-quartic_loss(y, t) = 0.25 * sum(abs(y .- t).^4) 
-quartic_lossd(y, t) = (y .- t).^3 
+quartic_loss(y, t) = 0.25 * nansum(abs(y .- t).^4)
+quartic_lossd(y, t) = (y .- t).^3
 
 function poisson_loss(y, t)
 	y[y.==0] = eps(typeof(y[1]))
-	sum(y .- t.*log(y))
+	nansum(y .- t.*log(y))
 end
 
 function poisson_lossd(y, t)
@@ -23,13 +23,13 @@ function poisson_lossd(y, t)
 	#d
 end
 
-linear_loss(y, t) = norm(y .- t, 1) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
+linear_loss(y, t) = nansum(abs(y .- t)) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
 linear_lossd(y, t) = sign(y .- t)
 
-hinge_loss(y, t, m=1.0) = sum(max(0, m - (y .* t))) # max(0, m - y t)
+hinge_loss(y, t, m=1.0) = nansum(max(0, m - (y .* t))) # max(0, m - y t)
 hinge_lossd(y, t, m=1.0) = - t .* (m > t .* y) # if (m > y t) then - t, else 0
 
-log_loss(y, t) = sum(- ((t .* log(y)) + ((1 - t) .* log(1 - y)))) # - t * log(y) - (1 - t) * log(1 - y)
+log_loss(y, t) = nansum(- ((t .* log(y)) + ((1 - t) .* log(1 - y)))) # - t * log(y) - (1 - t) * log(1 - y)
 log_lossd(y, t) = (t .- y) ./ ((y .- 1) .* y) # (t - y) / ((y - 1) * y)
 
 # dictionary of commonly-used loss derivatives
@@ -41,3 +41,13 @@ lossderivs = Dict{Function, Function}([
                                    hinge_loss        => hinge_lossd,
                                    log_loss          => log_lossd
                                    ])
+
+function nansum(A::Array)
+	s = zero(eltype(A))
+	for val in A
+		if !isnan(val)
+			s += val
+		end
+	end
+	return s
+end

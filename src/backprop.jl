@@ -63,6 +63,7 @@ function prop(tdmlp::TDMLP,x)
 		end
 	end
 	a = prop(tdmlp.net,x,tdmlp.delays,tdmlp.gain)
+  a[:,1:tdmlp.delays,:]=NaN
 	if tdmlp.trained
 		for l in tdmlp.net
 			l.a = shift!(acts)
@@ -111,6 +112,7 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Function)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
+        δ[isnan(δ)] = 0.
         grad = T[]        	# Initialize weight gradient array
     else                	# Intermediate layers
         l = net[1]
@@ -127,7 +129,7 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1})  ## Backprop for cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
-
+        δ[isnan(δ)] = 0.
         grad = T[]        	# Initialize weight gradient array
     elseif length(net) == 1                	# Last hidden layer
     	l = net[1]
@@ -157,6 +159,7 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
+        δ[isnan(δ)] = 0.
         grad = T[]        	# Initialize weight gradient array
     else                	# Intermediate layers
         l = net[1]
@@ -174,7 +177,7 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas)  ## Backprop for cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
-
+        δ[isnan(δ)] = 0.
         grad = T[]        	# Initialize weight gradient array
     elseif length(net) == 1                	# Last hidden layer
     	l = net[1]
@@ -205,6 +208,7 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas, weights, gain)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = lossd(x,t)     	# Error (δ) is simply difference with target
+        δ[isnan(δ)] = 0.
         grad = T[]        	# Initialize weight gradient array
     elseif length(net) == 1                	# Last hidden layer
     	  l = net[1]
@@ -231,7 +235,7 @@ end
 function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas, weights, gain)  ## Backprop for cannonical activation/loss function pairs
     if length(net) == 0   	# Final layer
         δ  = x .- t     	# Error (δ) is simply difference with target
-
+        δ[isnan(δ)] = 0.
         grad = T[]        	# Initialize weight gradient array
     elseif length(net) == 1                	# Last hidden layer
     	  l = net[1]
