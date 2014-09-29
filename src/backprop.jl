@@ -311,10 +311,10 @@ function errprop(w::Array{Float64,3}, d::Array{Float64,3})
 	δ
 end
 
-function mprop{T}(net::Vector{T}, x)  ## Backprop for non-cannonical activation/loss function pairs
+function mprop{T}(net::Vector{T}, x, gain)  ## Backprop for non-cannonical activation/loss function pairs
     if length(net) == 1                	# Last hidden layer
     	  l = net[1]
-        h = (l * x)           # Not a typo!
+        h = gain.*(l * x)           # Not a typo!
         y,idx = l.a(h)
     else
         l = net[1]
