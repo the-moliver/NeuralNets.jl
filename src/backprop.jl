@@ -23,8 +23,11 @@ function prop(net, x, delays::Int) ## Bug in this code it seems
 		z .+= (net[1].b + 0.)
 
 		z2 = zeros(eltype(x), size(z,1), size(z,2), delays+1);
+# 		for ii=0:delays
+# 			z2[:,:,ii+1] = [zeros(eltype(x), size(z,1), ii) z[:,1:end-ii]]
+# 		end
 		for ii=0:delays
-			z2[:,:,ii+1] = [zeros(eltype(x), size(z,1), ii) z[:,1:end-ii]]
+			z2[:,:,ii+1] = [z[:,1+ii:end] zeros(eltype(x), size(z,1), ii)]
 		end
 		z2
 
