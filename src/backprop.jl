@@ -29,7 +29,7 @@ function prop(net, x, delays::Int) ## Bug in this code it seems
 # 		for ii=0:delays
 # 			z2[:,:,ii+1] = [z[:,1+ii:end] zeros(eltype(x), size(z,1), ii)]
 # 		end
-    net[end].a(z2)
+    net[end].a(z2)[1]
 
 	else                    # Intermediate layers
 		net[end].a(net[end] * prop(net[1:end-1], x, delays))[1]
