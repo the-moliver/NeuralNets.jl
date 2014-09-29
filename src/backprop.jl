@@ -10,14 +10,15 @@ function prop(net, x, delays::Int, gain)
   net[end].a(gain.* (net[end] * prop(net[1:end-1], x, delays)))[1]
 end
 
-function prop(net, x, delays::Int)
+function prop(net, x, delays::Int) ## Bug in this code it seems
 	if length(net) == 0 # Input layer
 		x
 	elseif length(net) == 1 # First hidden layer, create 3d data to pass to rest of net
 
 		z = zeros(eltype(x), size(net[1].w,1), size(x,2));
 		for ti=1:size(net[1].w,3)
-			z += view(net[1].w,:,:,ti)*[zeros(eltype(x), size(x,1), ti-1) x[:,1:end-ti+1]]
+			#z += view(net[1].w,:,:,ti)*[zeros(eltype(x), size(x,1), ti-1) x[:,1:end-ti+1]]
+      z += view(net[1].w,:,:,ti)*[x[:,ti:end] zeros(eltype(x), size(x,1), ti-1)]
 		end
 		z .+= (net[1].b + 0.)
 
@@ -322,6 +323,33 @@ end
 
 
 function finite_diff(mlp,x,t,loss)
+  w = flatten_net(mlp)
+  w1 = deepcopy(w)
+
+  g = zeros(size(w));
+
+  for ii = 1:length(w)
+    w1[:] = deepcopy(w);
+    w1[ii] = w1[ii] + 1e-8;
+    unflatten_net!(mlp, w1)
+    #y=mprop(mlp.net,x)
+    y=prop(mlp,x)
+
+    err1 = loss(vec(y),vec(t));
+
+    w1[:] = deepcopy(w);
+    w1[ii] = w1[ii] - 1e-8;
+    unflatten_net!(mlp, w1)
+    y=prop(mlp,x)
+    #y=mprop(mlp.net,x)
+    err2 = loss(vec(y),vec(t));
+
+    g[ii] =(err1 - err2)./2e-8;
+  end
+  g
+end
+
+function finite_diff_m(mlp,x,t,loss)
   w = flatten_net(mlp)
   w1 = deepcopy(w)
 
