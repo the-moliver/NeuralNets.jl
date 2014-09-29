@@ -80,7 +80,7 @@ end
 function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
   delays = tdmlp.delays
   t_batch[:,:] = t[:,fitpoints]
-  t_batch[,fitpoints.<=tdmlp.delays] = NaN
+  t_batch[:,fitpoints.<=tdmlp.delays] = NaN
   for i=0:delays
     #x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
     for ii = [1:length(fitpoints)]
