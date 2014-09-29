@@ -17,19 +17,19 @@ function prop(net, x, delays::Int) ## Bug in this code it seems
 
 		z = zeros(eltype(x), size(net[1].w,1), size(x,2));
 		for ti=1:size(net[1].w,3)
-			#z += view(net[1].w,:,:,ti)*[zeros(eltype(x), size(x,1), ti-1) x[:,1:end-ti+1]]
-      z += view(net[1].w,:,:,ti)*[x[:,ti:end] zeros(eltype(x), size(x,1), ti-1)]
+			z += view(net[1].w,:,:,ti)*[zeros(eltype(x), size(x,1), ti-1) x[:,1:end-ti+1]]
+#       z += view(net[1].w,:,:,ti)*[x[:,ti:end] zeros(eltype(x), size(x,1), ti-1)]
 		end
 		z .+= (net[1].b + 0.)
 
 		z2 = zeros(eltype(x), size(z,1), size(z,2), delays+1);
-# 		for ii=0:delays
-# 			z2[:,:,ii+1] = [zeros(eltype(x), size(z,1), ii) z[:,1:end-ii]]
-# 		end
 		for ii=0:delays
-			z2[:,:,ii+1] = [z[:,1+ii:end] zeros(eltype(x), size(z,1), ii)]
+			z2[:,:,ii+1] = [zeros(eltype(x), size(z,1), ii) z[:,1:end-ii]]
 		end
-		z2
+# 		for ii=0:delays
+# 			z2[:,:,ii+1] = [z[:,1+ii:end] zeros(eltype(x), size(z,1), ii)]
+# 		end
+    net[end].a(z2)
 
 	else                    # Intermediate layers
 		net[end].a(net[end] * prop(net[1:end-1], x, delays))[1]
