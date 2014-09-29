@@ -10,7 +10,7 @@ function prop(net, x, delays::Int, gain)
   net[end].a(gain.* (net[end] * prop(net[1:end-1], x, delays)))[1]
 end
 
-function prop(net, x, delays::Int) ## Bug in this code it seems
+function prop(net, x, delays::Int)
 	if length(net) == 0 # Input layer
 		x
 	elseif length(net) == 1 # First hidden layer, create 3d data to pass to rest of net
@@ -18,7 +18,6 @@ function prop(net, x, delays::Int) ## Bug in this code it seems
 		z = zeros(eltype(x), size(net[1].w,1), size(x,2));
 		for ti=1:size(net[1].w,3)
 			z += view(net[1].w,:,:,ti)*[zeros(eltype(x), size(x,1), ti-1) x[:,1:end-ti+1]]
-#       z += view(net[1].w,:,:,ti)*[x[:,ti:end] zeros(eltype(x), size(x,1), ti-1)]
 		end
 		z .+= (net[1].b + 0.)
 
@@ -26,9 +25,7 @@ function prop(net, x, delays::Int) ## Bug in this code it seems
 		for ii=0:delays
 			z2[:,:,ii+1] = [zeros(eltype(x), size(z,1), ii) z[:,1:end-ii]]
 		end
-# 		for ii=0:delays
-# 			z2[:,:,ii+1] = [z[:,1+ii:end] zeros(eltype(x), size(z,1), ii)]
-# 		end
+
     net[end].a(z2)[1]
 
 	else                    # Intermediate layers
