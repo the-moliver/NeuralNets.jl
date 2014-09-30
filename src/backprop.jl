@@ -215,7 +215,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas, weights, gai
     	  l = net[1]
         h = gain.*(l * x)           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
         δ = l.ad(h,idx) .* δ
         δ = gain.*(weights.* δ)
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
@@ -224,7 +224,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Function, deltas, weights, gai
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
         δ = l.ad(h,idx) .* δ
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         δ = errprop!(l.w, δ, deltas[1])
@@ -242,7 +242,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas, weights
     	  l = net[1]
         h = gain.*(l * x)           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
         δ = gain.*(weights.* δ)
         unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
         δ = errprop!(l.w, δ, deltas[1])
@@ -251,7 +251,7 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas, weights
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end])
+        grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
 
         δ = l.ad(h,idx) .* δ
 
