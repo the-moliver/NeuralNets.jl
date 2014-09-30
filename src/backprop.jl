@@ -11,9 +11,10 @@ function prop(net, x, delays::Int, gain)
 end
 
 function prop(net, x, delays::Int)
-	if length(net) == 0 # Input layer
-		x
-	elseif length(net) == 1 # First hidden layer, create 3d data to pass to rest of net
+# 	if length(net) == 0 # Input layer
+# 		x
+# 	else
+  if length(net) == 1 # First hidden layer, create 3d data to pass to rest of net
 
 		z = zeros(eltype(x), size(net[1].w,1), size(x,2));
 		for ti=1:size(net[1].w,3)
