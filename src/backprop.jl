@@ -321,7 +321,7 @@ function mprop{T}(net::Vector{T}, x, gain)  ## Backprop for non-cannonical activ
         l = net[1]
         h = l * x           # Not a typo!
         y,idx = l.a(h)
-        y = mprop(net[2:end], y)
+        y = mprop(net[2:end], y, gain)
     end
     return y
 end
@@ -364,7 +364,7 @@ function finite_diff_m(mlp,x,t,loss)
     w1[:] = deepcopy(w);
     w1[ii] = w1[ii] + 1e-8;
     unflatten_net!(mlp, w1)
-    y=mprop(mlp.net,x)
+    y=mprop(mlp.net,x,mlp.gain)
     #y=prop(mlp,x)
 
     err1 = loss(vec(y),vec(t));
@@ -373,7 +373,7 @@ function finite_diff_m(mlp,x,t,loss)
     w1[ii] = w1[ii] - 1e-8;
     unflatten_net!(mlp, w1)
     #y=prop(mlp,x)
-    y=mprop(mlp.net,x)
+    y=mprop(mlp.net,x,mlp.gain)
     err2 = loss(vec(y),vec(t));
 
     g[ii] =(err1 - err2)./2e-8;
