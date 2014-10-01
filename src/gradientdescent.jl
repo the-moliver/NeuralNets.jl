@@ -128,10 +128,11 @@ end
 
 function maxnormreg!(net, maxnorm)
  for l = 1:length(net)-1
-   for hu = 1:size(net[l].w,1)
+  s1,s2,s2 = size(net[l].w)
+   for hu = 1:s1
      norms = sqrt(sum(view(net[l].w,hu,:) .^2.0))
      if norms>maxnorm
-       for ii=1:size(net[l].w,2)
+       for ii=1:s2*s3
          net[l].w[hu,ii] .*= maxnorm/norms
        end
      end
