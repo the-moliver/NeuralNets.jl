@@ -17,6 +17,7 @@ type MLP <: MLNN
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
     trained::Bool
+    gain::FloatingPoint
 end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
@@ -83,7 +84,7 @@ end
 											        l.b = l.b .+ c
 											    end
 											    net2
-											end											
+											end
 .-(net::Array{NNLayer}, c::FloatingPoint)  =  begin
 												net2=deepcopy(net)
 												for l in net2
@@ -99,7 +100,7 @@ end
 											        l.b = c .- l.b
 											    end
 											    net2
-											end											
+											end
 import Base.sign
 sign(l::NNLayer) = NNLayer(sign(l.w), sign(l.b), l.a, l.ad)
 
@@ -141,7 +142,7 @@ function calc_offsets(::Type{NNLayer}, dims)
 	offs
 end
 
-function MLP(layer_sizes::Vector{Int}, act::Vector{Function}; datatype = Float32)
+function MLP(layer_sizes::Vector{Int}, act::Vector{Function}; gain=1., datatype = Float32)
 	# some initializations
 	nlayers = length(layer_sizes) - 1
 	dims = [(layer_sizes[i+1],layer_sizes[i]) for i in 1:nlayers]
@@ -167,7 +168,7 @@ function MLP(layer_sizes::Vector{Int}, act::Vector{Function}; datatype = Float32
 
 	net = [NNLayer(Array(eltype(buf),0,0),Array(eltype(buf),0),act[i],actd[i]) for i=1:nlayers]
 
-	mlp = MLP(net, dims, buf, offs, false)
+	mlp = MLP(net, dims, buf, offs, false, gain)
 	unflatten_net!(mlp, buf)
 
 	mlp
