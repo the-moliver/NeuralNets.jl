@@ -301,6 +301,7 @@ function rmsproptrain(mlp::MLNN,
                   maxnorm::FloatingPoint=0.0,
                   loss=squared_loss,
                   weights=Array[],
+                  minibatchfn=mini_batch!,
                   verbose::Bool=true,
                   verboseiter::Int=100,
                   xval=Array[],
@@ -347,7 +348,7 @@ function rmsproptrain(mlp::MLNN,
     while i < size(fitpoints,2)
         i += 1
 
-        x_batch,t_batch,w_batch = mini_batch!(x,t,weights,x_batch,t_batch,w_batch,fitpoints[:,i], mlp)   # Create mini-batch
+        x_batch,t_batch,w_batch = minibatchfn(x,t,weights,x_batch,t_batch,w_batch,fitpoints[:,i], mlp)   # Create mini-batch
 
         mlp.net = mlp.net .+ m*Δw_old                                        # Nesterov Momentum, update with momentum before computing gradient
         ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas,w_batch,gain)
