@@ -2,9 +2,17 @@
 
 using ArrayViews
 
-abstract MLNN
+abstract MLNN Layer
 
-type NNLayer{T}
+type SMLayer{T} <: Layer
+    w::AbstractMatrix{T}
+    b::AbstractVector{T}
+    α::AbstractVector{T}
+    a::Function
+    ad::Function
+end
+
+type NNLayer{T} <: Layer
     w::AbstractMatrix{T}
     b::AbstractVector{T}
     a::Function
@@ -12,13 +20,32 @@ type NNLayer{T}
 end
 
 type MLP <: MLNN
-    net::Vector{NNLayer}
+    net::Vector{Layer}
     dims::Vector{(Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
     trained::Bool
     gain::FloatingPoint
 end
+
+
+*(l::SMLayer, x::Array{Float64}) = begin
+  for ii = 1:size(l.w,1)
+    wx = view(l.w,ii,:).*x'
+    awx = l.α.*wx
+    awx .-= maximum(awx)
+    awx = exp(awx)
+    (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b
+  end
+
+  *(l::SMLayer, x::Array{Float32}) = begin
+  for ii = 1:size(l.w,1)
+    wx = view(l.w,ii,:).*x'
+    awx = l.α.*wx
+    awx .-= maximum(awx)
+    awx = exp(awx)
+    (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b
+  end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
 *(l::NNLayer, x::Array{Float64}) = l.w*x .+ l.b
