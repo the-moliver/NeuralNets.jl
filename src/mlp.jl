@@ -2,7 +2,8 @@
 
 using ArrayViews
 
-abstract MLNN Layer
+abstract MLNN
+abstract Layer
 
 type SMLayer{T} <: Layer
     w::AbstractMatrix{T}
@@ -30,22 +31,28 @@ end
 
 
 *(l::SMLayer, x::Array{Float64}) = begin
+  out = zeros(Float64,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
     wx = view(l.w,ii,:).*x'
-    awx = l.α.*wx
+    awx = l.α[ii].*wx
     awx .-= maximum(awx)
     awx = exp(awx)
-    (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b
+    out[ii,:] = (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b[ii]
   end
+  out
+end
 
   *(l::SMLayer, x::Array{Float32}) = begin
+  out = zeros(Float32,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
     wx = view(l.w,ii,:).*x'
-    awx = l.α.*wx
+    awx = l.α[ii].*wx
     awx .-= maximum(awx)
     awx = exp(awx)
-    (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b
+    out[ii,:] = (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b[ii]
   end
+  out
+end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
 *(l::NNLayer, x::Array{Float64}) = l.w*x .+ l.b
