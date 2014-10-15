@@ -30,24 +30,46 @@ type MLP <: MLNN
 end
 
 
-function smder(l::SMLayer, x::Array{Float64},h::Array{Float64})
-  out = zeros(Float64,size(l.w,1),size(x,2),size(x,1))
+function smader(l::SMLayer, x::Array{Float64},h::Array{Float64})
+  out = zeros(Float64,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
-    wx = view(l.w,ii,:).*x'
-    awx = l.α[ii].*wx
-    eawx = exp(awx.-maximum(awx))
-    out[ii,:,:] = (eawx.*(1.+awx).*(x .- h[ii,:])')./sum(view(l.w,ii,:).*awx,2)
+    awx = l.α[ii].*x .+ w
+    awx .-= maximum(awx)
+    awx = exp(awx)
+    out[ii,:] = (sum((x.^2).*awx,2)./sum(awx,2)) .- (h[ii,:] .- l.b[ii]).^2
   end
   out
 end
 
-function smder(l::SMLayer, x::Array{Float32},h::Array{Float32})
+function smader(l::SMLayer, x::Array{Float32},h::Array{Float32})
+  out = zeros(Float64,size(l.w,1),size(x,2))
+  for ii = 1:size(l.w,1)
+    awx = l.α[ii].*x .+ w
+    awx .-= maximum(awx)
+    awx = exp(awx)
+    out[ii,:] = (sum((x.^2).*awx,2)./sum(awx,2)) .- (h[ii,:] .- l.b[ii]).^2
+  end
+  out
+end
+
+function smwder(l::SMLayer, x::Array{Float64},h::Array{Float64})
+  out = zeros(Float64,size(l.w,1),size(x,2),size(x,1))
+  for ii = 1:size(l.w,1)
+    awx = l.α[ii].*x .+ w
+    awx .-= maximum(awx)
+    awx = exp(awx)
+    out[ii,:,:] = (awx.*(x .- h[ii,:] .+ l.b[ii]))./sum(awx,2)
+  end
+  out
+end
+
+function smwder(l::SMLayer, x::Array{Float32},h::Array{Float32})
   out = zeros(Float32,size(l.w,1),size(x,2),size(x,1))
   for ii = 1:size(l.w,1)
-    wx = view(l.w,ii,:).*x'
-    awx = l.α[ii].*wx
-    eawx = exp(awx.-maximum(awx))
-    out[ii,:,:] = (eawx.*(1.+awx).*(x .- h[ii,:] .+ l.b[ii])')./sum(view(l.w,ii,:).*awx,2)
+    awx = l.α[ii].*x .+ w
+    awx .-= maximum(awx)
+    awx = exp(awx)
+    out[ii,:,:] = (awx.*(x .- h[ii,:] .+ l.b[ii]))./sum(awx,2)
   end
   out
 end
@@ -63,11 +85,10 @@ end
 *(l::SMLayer, x::Array{Float64}) = begin
   out = zeros(Float64,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
-    wx = view(l.w,ii,:).*x'
-    awx = l.α[ii].*wx
+    awx = l.α[ii].*x .+ w
     awx .-= maximum(awx)
     awx = exp(awx)
-    out[ii,:] = (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b[ii]
+    out[ii,:] = (sum(x.*awx,2)./sum(awx,2)) .+ l.b[ii]
   end
   out
 end
@@ -75,11 +96,10 @@ end
 *(l::SMLayer, x::Array{Float32}) = begin
   out = zeros(Float32,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
-    wx = view(l.w,ii,:).*x'
-    awx = l.α[ii].*wx
+    awx = l.α[ii].*x .+ w
     awx .-= maximum(awx)
     awx = exp(awx)
-    out[ii,:] = (sum(wx.*awx,2)./sum(view(l.w,ii,:).*awx,2)) .+ l.b[ii]
+    out[ii,:] = (sum(x.*awx,2)./sum(awx,2)) .+ l.b[ii]
   end
   out
 end
