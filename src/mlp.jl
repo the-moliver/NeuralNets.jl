@@ -47,9 +47,17 @@ function smder(l::SMLayer, x::Array{Float32},h::Array{Float32})
     wx = view(l.w,ii,:).*x'
     awx = l.α[ii].*wx
     eawx = exp(awx.-maximum(awx))
-    out[ii,:,:] = (eawx.*(1.+awx).*(x .- h[ii,:])')./sum(view(l.w,ii,:).*awx,2)
+    out[ii,:,:] = (eawx.*(1.+awx).*(x .- h[ii,:] .+ l.b[ii])')./sum(view(l.w,ii,:).*awx,2)
   end
   out
+end
+
+*(d::Array{Float64,3}, x::Array{Float64,2}) = begin
+  squeeze(sum(d.*reshape(x, 1,size(x,1),size(x,2)),2),2)
+end
+
+*(d::Array{Float32,3}, x::Array{Float32,2}) = begin
+  squeeze(sum(d.*reshape(x, 1,size(x,1),size(x,2)),2),2)
 end
 
 *(l::SMLayer, x::Array{Float64}) = begin

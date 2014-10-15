@@ -284,8 +284,9 @@ function backprop{T}(net::Vector{SMLayer}, x, t, lossd::Function, deltas, weight
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
         δ = l.ad(h,idx) .* δ
-        δ = smder(l,x,h) .* δ
-        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        aδ = smader(l,x,h) .* δ
+        δ = smwder(l,x,h) .* δ
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),aδ,exp,exp))  # Weight gradient
         δ = errprop!(l.w, δ, deltas[1])
     end
     return grad,δ
@@ -303,7 +304,7 @@ function backprop{T}(net::Vector{SMLayer}, x, t, lossd::Array{None,1}, deltas, w
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
         δ = gain.*(weights.* δ)
-        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),aδ,exp,exp))  # Weight gradient
         δ = errprop!(l.w, δ, deltas[1])
 
     else
@@ -312,8 +313,9 @@ function backprop{T}(net::Vector{SMLayer}, x, t, lossd::Array{None,1}, deltas, w
         y,idx = l.a(h)
         grad,δ = backprop(net[2:end], y, t, lossd, deltas[2:end], weights, gain)
         δ = l.ad(h,idx) .* δ
-        δ = smder(l,x,h) .* δ
-        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),exp,exp))  # Weight gradient
+        aδ = smader(l,x,h) .* δ
+        δ = smwder(l,x,h) .* δ
+        unshift!(grad,typeof(l)(δ*x',vec(sum(sum(δ,2),3)),aδ,exp,exp))  # Weight gradient
         δ = errprop!(l.w, δ, deltas[1])
     end
     return grad,δ
