@@ -42,7 +42,7 @@ function smader(l::SMLayer, x::Array{Float64},h::Array{Float64})
 end
 
 function smader(l::SMLayer, x::Array{Float32},h::Array{Float32})
-  out = zeros(Float64,size(l.w,1),size(x,2))
+  out = zeros(Float32,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
     awx = l.α[ii].*x .+ w
     awx .-= maximum(awx)
