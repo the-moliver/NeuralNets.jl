@@ -30,6 +30,28 @@ type MLP <: MLNN
 end
 
 
+function smder(l::SMLayer, x::Array{Float64},h::Array{Float64})
+  out = zeros(Float64,size(l.w,1),size(x,2),size(x,1))
+  for ii = 1:size(l.w,1)
+    wx = view(l.w,ii,:).*x'
+    awx = l.α[ii].*wx
+    eawx = exp(awx.-maximum(awx))
+    out[ii,:,:] = (eawx.*(1.+awx).*(x .- h[ii,:])')./sum(view(l.w,ii,:).*awx,2)
+  end
+  out
+end
+
+function smder(l::SMLayer, x::Array{Float32},h::Array{Float32})
+  out = zeros(Float32,size(l.w,1),size(x,2),size(x,1))
+  for ii = 1:size(l.w,1)
+    wx = view(l.w,ii,:).*x'
+    awx = l.α[ii].*wx
+    eawx = exp(awx.-maximum(awx))
+    out[ii,:,:] = (eawx.*(1.+awx).*(x .- h[ii,:])')./sum(view(l.w,ii,:).*awx,2)
+  end
+  out
+end
+
 *(l::SMLayer, x::Array{Float64}) = begin
   out = zeros(Float64,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
@@ -42,7 +64,7 @@ end
   out
 end
 
-  *(l::SMLayer, x::Array{Float32}) = begin
+*(l::SMLayer, x::Array{Float32}) = begin
   out = zeros(Float32,size(l.w,1),size(x,2))
   for ii = 1:size(l.w,1)
     wx = view(l.w,ii,:).*x'
