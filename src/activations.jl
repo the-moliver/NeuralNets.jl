@@ -7,7 +7,7 @@ logisd(x,idx) = exp(x) ./ ((1. .+ exp(x)).^2.)
 function logissafe(x)
 	logis(x)
 end
-logissafed(x,idx) = logisd(min(x,400.0))
+logissafed(x,idx) = logisd(min(x,400.0),idx)
 
 function softmaxact(x)
 	ex = exp(x.-maximum(x,1))
