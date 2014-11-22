@@ -13,7 +13,8 @@ type SMLayer{T} <: Layer
     ad::Function
 end
 
-type NNLayer{T} <: Layer
+# type NNLayer{T} <: Layer
+type NNLayer{T}
     w::AbstractMatrix{T}
     b::AbstractVector{T}
     a::Function
@@ -21,7 +22,7 @@ type NNLayer{T} <: Layer
 end
 
 type MLP <: MLNN
-    net::Vector{Layer}
+    net::Vector{NNLayer}
     dims::Vector{(Int,Int)}  # topology of net
     buf::AbstractVector      # in-place data store
     offs::Vector{Int}    # indices into in-place store
