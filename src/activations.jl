@@ -182,7 +182,6 @@ derivs = Dict{Function, Function}([
                                    logis 	 => logisd,
                                    logissafe => logissafed,
                                    relu      => relud,
-                                   donrelu   => donrelud,
                                    srelu     => srelud,
                                    nrelu     => nrelud,
                                    ident     => identd,
