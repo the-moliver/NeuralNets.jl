@@ -3,17 +3,7 @@
 using ArrayViews
 
 abstract MLNN
-abstract Layer
 
-type SMLayer{T} <: Layer
-    w::AbstractMatrix{T}
-    b::AbstractVector{T}
-    α::AbstractVector{T}
-    a::Function
-    ad::Function
-end
-
-# type NNLayer{T} <: Layer
 type NNLayer{T}
     w::AbstractMatrix{T}
     b::AbstractVector{T}
@@ -23,91 +13,17 @@ end
 
 type MLP <: MLNN
     net::Vector{NNLayer}
-    dims::Vector{(Int,Int)}  # topology of net
-    buf::AbstractVector      # in-place data store
-    offs::Vector{Int}    # indices into in-place store
-    trained::Bool
-    gain::FloatingPoint
+    dims::Vector{(Int,Int)} # topology of net
+    buf::AbstractVector     # in-place data store
+    offs::Vector{Int}    	# indices into in-place store
+    trained::Bool 			# training state
+    gain::FloatingPoint		# gain before output activation
 end
 
 
-function smader(l::SMLayer, x::Array{Float64},h::Array{Float64})
-  out = zeros(Float64,size(l.w,1),size(x,2))
-  for ii = 1:size(l.w,1)
-    ax = l.α[ii].*x
-    ax .-= maximum(ax)
-    wax = w.*exp(ax)
-    out[ii,:] = (sum((x.^2).*wax,2)./sum(wax,2)) .- (h[ii,:] .- l.b[ii]).^2
-  end
-  out
-end
-
-function smader(l::SMLayer, x::Array{Float32},h::Array{Float32})
-  out = zeros(Float32,size(l.w,1),size(x,2))
-  for ii = 1:size(l.w,1)
-    ax = l.α[ii].*x
-    ax .-= maximum(ax)
-    wax = w.*exp(ax)
-    out[ii,:] = (sum((x.^2).*wax,2)./sum(wax,2)) .- (h[ii,:] .- l.b[ii]).^2
-  end
-  out
-end
-
-function smwder(l::SMLayer, x::Array{Float64},h::Array{Float64})
-  out = zeros(Float64,size(l.w,1),size(x,2),size(x,1))
-  for ii = 1:size(l.w,1)
-    ax = l.α[ii].*x
-    ax .-= maximum(ax)
-    ax = exp(ax)
-    out[ii,:,:] = (ax.*(x .- h[ii,:] .+ l.b[ii]))./sum(w.*ax,2)
-  end
-  out
-end
-
-function smwder(l::SMLayer, x::Array{Float32},h::Array{Float32})
-  out = zeros(Float32,size(l.w,1),size(x,2),size(x,1))
-  for ii = 1:size(l.w,1)
-    ax = l.α[ii].*x
-    ax .-= maximum(ax)
-    ax = exp(ax)
-    out[ii,:,:] = (ax.*(x .- h[ii,:] .+ l.b[ii]))./sum(w.*ax,2)
-  end
-  out
-end
-
-*(d::Array{Float64,3}, x::Array{Float64,2}) = begin
-  squeeze(sum(d.*reshape(x, 1,size(x,1),size(x,2)),2),2)
-end
-
-*(d::Array{Float32,3}, x::Array{Float32,2}) = begin
-  squeeze(sum(d.*reshape(x, 1,size(x,1),size(x,2)),2),2)
-end
-
-*(l::SMLayer, x::Array{Float64}) = begin
-  out = zeros(Float64,size(l.w,1),size(x,2))
-  for ii = 1:size(l.w,1)
-    ax = l.α[ii].*x
-    ax .-= maximum(ax)
-    wax = w.*exp(ax)
-    out[ii,:] = (sum(x.*wax,2)./sum(wax,2)) .+ l.b[ii]
-  end
-  out
-end
-
-*(l::SMLayer, x::Array{Float32}) = begin
-  out = zeros(Float32,size(l.w,1),size(x,2))
-  for ii = 1:size(l.w,1)
-    ax = l.α[ii].*x
-    ax .-= maximum(ax)
-    wax = w.*exp(ax)
-    out[ii,:] = (sum(x.*wax,2)./sum(wax,2)) .+ l.b[ii]
-  end
-  out
-end
 
 # In all operations between two NNLayers, the activations functions are taken from the first NNLayer
-*(l::NNLayer, x::Array{Float64}) = l.w*x .+ l.b
-*(l::NNLayer, x::Array{Float32}) = l.w*x .+ l.b
+*{T}(l::NNLayer, x::Array{T}) = l.w*x .+ l.b
 .*(c::FloatingPoint, l::NNLayer) = NNLayer(c.*l.w, c.*l.b, l.a, l.ad)
 .*(l::NNLayer, c::FloatingPoint) = NNLayer(l.w.*c, l.b.*c, l.a, l.ad)
 .*(l::NNLayer, m::NNLayer) = NNLayer(l.w.*m.w, l.b.*m.b, l.a, l.ad)
@@ -247,6 +163,7 @@ function MLP(layer_sizes::Vector{Int}, act::Vector{Function}; gain=1., datatype 
 	for ii = 1:length(layer_sizes)-1
 		nw = layer_sizes[ii]*layer_sizes[ii+1]
 		nb = layer_sizes[ii+1]
+		# initalize weights with normalized initialization (Glorot & Bengio 2010)
 		buf = [buf; 2.*(rand(datatype, nw,1)-.5).*sqrt(6.)./ sqrt(layer_sizes[ii] + layer_sizes[ii+1]); zeros(datatype, nb,1)]
 	end
 	buf = vec(buf)
