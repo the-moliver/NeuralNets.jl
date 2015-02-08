@@ -11,12 +11,12 @@ end
 
 type TDMLP <: MLNN
     net::Vector{TDNNLayer}
-    dims::Vector{(Int,Int,Int)}  # topology of net
-    buf::AbstractVector      # in-place data store
-    offs::Vector{Int}    # indices into in-place store
-    delays::Int    # total number of lags needed for forward pass
-    trained::Bool
-    gain::FloatingPoint
+    dims::Vector{(Int,Int,Int)} # topology of net
+    buf::AbstractVector      	# in-place data store
+    offs::Vector{Int}    		# indices into in-place store
+    delays::Int    				# total number of lags needed for forward pass
+    trained::Bool 				# training state
+    gain::FloatingPoint			# gain before output activation
 end
 
 type deltaLayer{T}
@@ -30,51 +30,25 @@ end
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
 
 
-*(l::TDNNLayer, x::Array{Float64,3}) = begin
+*{T}(l::TDNNLayer, x::Array{T,3}) = begin
 	nd = size(x,3)-size(l.w,3)+1
-	z = zeros(eltype(x), size(l.w,1), size(x,2), nd);
-	#rg =size(l.w,1)*size(x,2);
+	z = zeros(T, size(l.w,1), size(x,2), nd);
 	for ti = 1:nd, ti2 = 1:size(l.w,3)
-      	#@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
-        #Base.LinAlg.BLAS.axpy!(1,view(l.w,:,:,ti2)*x[:,:,ti+ti2-1],range(1,rg),z[:,:,ti],range(1,rg))
-      Base.LinAlg.BLAS.gemm!('N', 'N', one(Float64), view(l.w,:,:,ti2), view(x,:,:,ti+ti2-1), one(Float64), view(z,:,:,ti))
+      Base.LinAlg.BLAS.gemm!('N', 'N', one(T), view(l.w,:,:,ti2), view(x,:,:,ti+ti2-1), one(T), view(z,:,:,ti))
   	end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
 
-*(d::Array{Float64,3}, x::Array{Float64,3}) = begin
+*{T}(d::Array{T,3}, x::Array{T,3}) = begin
  	tt= size(x,3)-size(d,3)+1
-  	gw = zeros(eltype(x), size(d,1), size(x,1), tt)
-  	for ti=1:tt
-    	for ti2 = 1:size(d,3)
-    		gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
-    	end
+  	gw = zeros(T, size(d,1), size(x,1), tt)
+  	for ti=1:tt, for ti2 = 1:size(d,3)
+    		# gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
+		Base.LinAlg.BLAS.gemm!('N', 'T', one(T), d[:,:,ti2], x[:,:,ti+ti2-1], one(T), gw[:,:,ti])
   	end
   	gw
 end
 
-*(l::TDNNLayer, x::Array{Float32,3}) = begin
-	nd = size(x,3)-size(l.w,3)+1
-	z = zeros(eltype(x), size(l.w,1), size(x,2), nd);
-	#rg =size(l.w,1)*size(x,2);
-	for ti = 1:nd, ti2 = 1:size(l.w,3)
-      	#@inbounds z[:,:,ti] += view(l.w,:,:,ti2)*x[:,:,ti+ti2-1];
-        #Base.LinAlg.BLAS.axpy!(1,view(l.w,:,:,ti2)*x[:,:,ti+ti2-1],range(1,rg),z[:,:,ti],range(1,rg))
-      Base.LinAlg.BLAS.gemm!('N', 'N', one(Float32), view(l.w,:,:,ti2), view(x,:,:,ti+ti2-1), one(Float32), view(z,:,:,ti))
-  	end
-  	z .+= (l.b + 0.) # convert to standard array so broadcasting works
-end
-
-*(d::Array{Float32,3}, x::Array{Float32,3}) = begin
- 	tt= size(x,3)-size(d,3)+1
-  	gw = zeros(eltype(x), size(d,1), size(x,1), tt)
-  	for ti=1:tt
-    	for ti2 = 1:size(d,3)
-    		gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
-    	end
-  	end
-  	gw
-end
 
 .*(c::FloatingPoint, l::TDNNLayer) = TDNNLayer(c.*l.w, c.*l.b, l.a, l.ad)
 .*(l::TDNNLayer, c::FloatingPoint) = TDNNLayer(l.w.*c, l.b.*c, l.a, l.ad)
@@ -215,10 +189,10 @@ function TDMLP(layer_sizes::Vector{Int}, layer_delays::Vector{Int}, act::Vector{
 	for ii = 1:length(layer_sizes)-1
 		nw = layer_sizes[ii]*layer_sizes[ii+1]*layer_delays[ii]
 		nb = layer_sizes[ii+1]
+		# initalize weights with normalized initialization (Glorot & Bengio 2010)
 		buf = [buf; 2.*(rand(datatype, nw,1)-.5).*sqrt(6.)./ sqrt(layer_sizes[ii]*layer_delays[ii] + layer_sizes[ii+1]); zeros(datatype, nb,1)]
 	end
 	buf = vec(buf)
-	#buf = genf(offs[end])
 
 	delays = sum(layer_delays) - length(layer_delays)
 
