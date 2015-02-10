@@ -176,25 +176,12 @@ function backprop{T}(net::Vector{T}, x, t, lossd::Array{None,1}, deltas, weights
 end
 
 
-## Error back-propagation for mlp
-function errprop{T}(w::Array{T,2}, d::Array{T,2})
-	δ = w' * d
-end
 
 ## Error back-propagation for mlp, with preallocated memory in deltas
 function errprop!{T}(w::Array{T,2}, d::Array{T,2},deltas)
     deltas.d[:] = w' * d
 end
 
-## Error back-propagation for tdmlp
-function errprop{T}(w::Array{T,3}, d::Array{T,3})
-	δ = zeros(T,size(w,2),size(d,2), size(w,3)+size(d,3)-1)
-	for ti=1:size(w,3), ti2 = 1:size(d,3)
-	    # δ[:,:,ti+ti2-1] += w[:,:,ti]'*d[:,:,ti2];
-        Base.LinAlg.BLAS.gemm!('T', 'N', one(T), view(w,:,:,ti), view(d,:,:,ti2), one(T), view(δ,:,:,ti+ti2-1))
-	end
-	δ
-end
 
 ## Error back-propagation for tdmlp, with preallocated memory in deltas
 function errprop!{T}(w::Array{T,3}, d::Array{T,3}, deltas)
