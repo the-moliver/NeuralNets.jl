@@ -1,4 +1,4 @@
-# collection of commonly-used loss functions
+# collection of commonly-used loss functions and their derivatives
 
 # y = predicted value, t = expected value
 
@@ -19,8 +19,6 @@ end
 function poisson_lossd(y, t)
 	y[y.==0] = eps(typeof(y[1]))
 	d = 1 .- (t ./ y)
-	#d[y.==0] = y[y.==0] .- t[y.==0]
-	#d
 end
 
 linear_loss(y, t) = nansum(abs(y .- t)) # L(y, t) = || y .- t ||_1 = sum(abs(y .- t))
