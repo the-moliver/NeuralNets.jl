@@ -19,13 +19,6 @@ type TDMLP <: MLNN
     gain::FloatingPoint			# gain before output activation
 end
 
-type deltaLayer{T}
-    d::AbstractArray{T}
-end
-
-type Deltas
-    deltas::Vector{deltaLayer}
-end
 
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
 
