@@ -1,32 +1,16 @@
 using StatsBase
 
-# batch
-# function to retrieve a random subset of data
-# currently quite ugly, if anyone knows how to do this better go ahead
-function batch(b::Int,x::Array,t::Array)
-    n = size(x,2)
-    b == n && return x,t
-    b > n && throw("Error: Batch size larger than the number of data points supplied.")
-    index = rand(1:n, b)
-    return x[:,index],t[:,index]
+
+## create indicies for minibatches
+function sample_epoch(datasize, batch_size)
+    fitpoints = [1:datasize]
+    numtoadd = batch_size - length(fitpoints)%batch_size
+    append!(fitpoints, sample(fitpoints,numtoadd))
+    numfitpoints = length(fitpoints)
+    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, int(numfitpoints/batch_size))
 end
 
-function mini_batch_init(x,t, fitpoints, mlp::MLP)
-  x_batch = x[:,fitpoints]
-  t_batch = t[:,fitpoints]
-
-  x_batch,t_batch
-end
-
-function mini_batch_init(x,t, fitpoints, tdmlp::TDMLP)
-  delays = tdmlp.delays
-  x_batch = zeros(eltype(x),size(x,1), length(fitpoints), delays+1)
-
-  t_batch = t[:,fitpoints]
-
-  x_batch,t_batch
-end
-
+## Initialize mini-batches
 function mini_batch_init(x,t,w, fitpoints, mlp::MLP)
   x_batch = x[:,fitpoints]
   t_batch = t[:,fitpoints]
@@ -38,13 +22,13 @@ end
 function mini_batch_init(x,t,w, fitpoints, tdmlp::TDMLP)
   delays = tdmlp.delays
   x_batch = zeros(eltype(x),size(x,1), length(fitpoints), delays+1)
-
   t_batch = t[:,fitpoints]
   w_batch = w[:,fitpoints]
 
   x_batch,t_batch,w_batch
 end
 
+## In-place update minibatches
 function mini_batch!(x,t,w,x_batch,t_batch,w_batch,fitpoints, mlp::MLP)
   x_batch[:,:] = x[:,fitpoints]
   t_batch[:,:] = t[:,fitpoints]
@@ -59,7 +43,6 @@ function mini_batch!(x,t,w,x_batch,t_batch,w_batch,fitpoints, tdmlp::TDMLP)
   t_batch[:,fitpoints.<=tdmlp.delays] = NaN
   w_batch[:,:] = w[:,fitpoints]
   for i=0:delays
-    #x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
     for ii = [1:length(fitpoints)]
       x_batch[:,ii,i+1] = view(x,:,fitpoints[ii])
     end
@@ -70,29 +53,18 @@ function mini_batch!(x,t,w,x_batch,t_batch,w_batch,fitpoints, tdmlp::TDMLP)
   x_batch,t_batch,w_batch
 end
 
-function mini_batch!(x,t,x_batch,t_batch,fitpoints, mlp::MLP)
-  x_batch[:,:] = x[:,fitpoints]
-  t_batch[:,:] = t[:,fitpoints]
 
-  x_batch,t_batch
+## Create delta type to hold back-propagated errors in memory
+type deltaLayer{T}
+    d::AbstractArray{T}
 end
 
-function mini_batch!(x,t,x_batch,t_batch,fitpoints, tdmlp::TDMLP)
-  delays = tdmlp.delays
-  t_batch[:,:] = t[:,fitpoints]
-  t_batch[:,fitpoints.<=tdmlp.delays] = NaN
-  for i=0:delays
-    #x_batch[:,:,i+1] = x[:,max(fitpoints,1)]
-    for ii = [1:length(fitpoints)]
-      x_batch[:,ii,i+1] = view(x,:,fitpoints[ii])
-    end
-    fitpoints .-= 1
-    fitpoints = max(fitpoints,1)
-  end
-
-  x_batch,t_batch
+type Deltas
+    deltas::Vector{deltaLayer}
 end
 
+
+## Intialize deltas
 function deltas_init(tdmlp::TDMLP, batch_size)
   layer_delays = Int[]
   nlayers = size(tdmlp.net,1)
@@ -126,6 +98,8 @@ function deltas_init(mlp::MLP, batch_size)
   D
 end
 
+
+## Apply max-norm regularization in-place
 function maxnormreg!(net, maxnorm)
  for l = 1:length(net)-1
   s1 = size(net[l].w)
@@ -140,34 +114,20 @@ function maxnormreg!(net, maxnorm)
  end
 end
 
-#function maxnormreg!(net, maxnorm)
-#    for hu = 1:size(net[1].w,1)
-#      norms = sqrt(sum(view(net[1].w,hu,:,:) .^2.0))
-#      if norms>maxnorm
-#        for ii=1:size(net[1].w,2)
-#          net[1].w[hu,ii] .*= maxnorm/norms
-#        end
-#      end
-#    end
-#end
 
-function sample_epoch(datasize, batch_size)
-    fitpoints = [1:datasize]
-    numtoadd = batch_size - length(fitpoints)%batch_size
-    append!(fitpoints, sample(fitpoints,numtoadd))
-    numfitpoints = length(fitpoints)
-    fitpoints = reshape(fitpoints[randperm(numfitpoints)], batch_size, int(numfitpoints/batch_size))
-end
 
 # Train a MLP using gradient decent with Nesterov momentum.
-# mlp.net:  array of neural network layers
-# x:        input data
-# t:        target data
-# η:        learning rate
-# m:        momentum coefficient
-# c:        convergence criterion
-# eval:     how often we evaluate the loss function
-# verbose:  train with printed feedback about the error function
+# mlp.net:        array of neural network layers
+# x:              input data
+# t:              target data
+# batch_size:     samples in mini-batch
+# maxiter:        number of epochs to train for
+# tol:            convergence criterion
+# learning_rate:  step size for weight update
+# momentum_rate:  amount of momentum
+# loss:           loss function to minimize
+# eval:           how often we evaluate the loss function
+# verbose:        train with printed feedback about the error function
 function gdmtrain(mlp::MLNN,
                   x,
                   t;
@@ -178,114 +138,171 @@ function gdmtrain(mlp::MLNN,
                   momentum_rate=.6,
                   eval::Int=10,
                   loss=squared_loss,
+                  weights=Array[],
+                  minibatchfn=mini_batch!,
                   verbose::Bool=true,
                   verboseiter::Int=100)
-    n = size(x,2)
-    η, c, m, b = learning_rate, tol, momentum_rate, batch_size
-    i = e_old = Δw_old = 0
-    e_new = loss(prop(mlp,x),t)
-    converged::Bool = false
 
-    if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
-        lossd = []
-    else
-        lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+  n = size(x,2)
+  η, c, m, b = learning_rate, tol, momentum_rate, batch_size
+  i = e_old = Δw_old = 0
+  e_new = loss(prop(mlp,x),t)
+  converged::Bool = false
+
+  if isempty(weights)
+    weights=ones(eltype(t),size(t))  # set weights to 1 if no weights are declared
+  end
+
+  # if check if loss function is paired with cannonical output activation function
+  if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
+      lossd = [] # if cannonical, derivative function is not needed
+  else
+      lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)  # if non-cannonical, use derivative and autodiff if not specified
+  end
+
+  # Initialize mini-batch and delta structure
+  x_batch,t_batch,w_batch = mini_batch_init(x,t,weights, [1:batch_size], mlp)              
+  D = deltas_init(mlp, batch_size)
+
+  while epoch < maxiter
+    epoch += 1
+
+    fitpoints = sample_epoch(n, batch_size)                                  # Create mini-batch sample points for epoch
+
+    if epoch > 1
+      η .*= learning_rate_factor
     end
 
-    while (!converged && i < maxiter)
-        i += 1
-        x_batch,t_batch = batch(b,x,t)
-        mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
-        Δw_new = -η*∇                     # calculate Δ weights
-        mlp.net = mlp.net .+ Δw_new       # update weights
-        Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
+    i = 0
 
-        if i % eval == 0  # recalculate loss every eval number iterations
-            e_old = e_new
-            e_new = loss(prop(mlp,x),t)
-            converged = abs(e_new - e_old) < c # check if converged
-        end
-        if verbose && i % verboseiter == 0
-            println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
-        end
+    while (!converged && i < size(fitpoints,2))
+      i += 1
+
+      x_batch,t_batch,w_batch = minibatchfn(x,t,weights,x_batch,t_batch,w_batch,fitpoints[:,i], mlp)   # Create mini-batch
+
+      mlp.net = mlp.net .+ m*Δw_old      # Nesterov Momentum, update with momentum before computing gradient
+      ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas,w_batch,gain)
+      Δw_new = -η*∇                     # calculate Δ weights
+      mlp.net = mlp.net .+ Δw_new       # update weights
+      Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
+
+      if i % eval == 0  # recalculate loss every eval number iterations
+          e_old = e_new
+          e_new = loss(prop(mlp,x),t)
+          converged = abs(e_new - e_old) < c # check if converged
+      end
+      if verbose && i % verboseiter == 0
+          println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
+      end
     end
-    convgstr = converged ? "converged" : "didn't converge"
-    println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
-    println("* learning rate η = $η")
-    println("* momentum coefficient m = $m")
-    println("* convergence criterion c = $c")
-    mlp.trained=true
-    return mlp
+      convgstr = converged ? "converged" : "didn't converge"
+      println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
+      println("* learning rate η = $η")
+      println("* momentum coefficient m = $m")
+      println("* convergence criterion c = $c")
+
+  end
+
+  mlp.trained=true
+  return mlp
 end
 
 # Train a MLP using Adagrad
-# mlp.net:  array of neural network layers
-# x:        input data
-# t:        target data
-# η:        learning rate
-# c:        convergence criterion
-# ε:        small constant for numerical stability
-# eval:     how often we evaluate the loss function
-# verbose:  train with printed feedback about the error function
+# mlp.net:        array of neural network layers
+# x:              input data
+# t:              target data
+# batch_size:     samples in mini-batch
+# maxiter:        number of epochs to train for
+# lambda:         parameter to prevent divide by zero
+# tol:            convergence criterion
+# learning_rate:  step size for weight update
+# loss:           loss function to minimize
+# eval:           how often we evaluate the loss function
+# verbose:        train with printed feedback about the error function
 function adatrain(mlp::MLNN,
                   x,
                   t;
                   batch_size=size(x,2),
-                  maxiter::Int=1000,
+                  maxiter::Int=100,
                   tol::Real=1e-5,
                   learning_rate=.3,
                   lambda=1e-6,
                   loss=squared_loss,
+                  weights=Array[],
+                  minibatchfn=mini_batch!,
                   eval::Int=10,
                   verbose::Bool=true)
 
-    η, c, λ, b = learning_rate, tol, lambda, batch_size
-    i = e_old = Δnet = sumgrad = 0.0
-    e_new = loss(prop(mlp,x),t)
-    n = size(x,2)
-    converged::Bool = false
+  η, c, λ, b = learning_rate, tol, lambda, batch_size
+  i = e_old = Δnet = sumgrad = 0.0
+  e_new = loss(prop(mlp,x),t)
+  n = size(x,2)
+  converged::Bool = false
 
-    if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
-        lossd = []
-    else
-        lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+  if isempty(weights)
+    weights=ones(eltype(t),size(t))  # set weights to 1 if no weights are declared
+  end
+
+  # if check if loss function is paired with cannonical output activation function
+  if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
+      lossd = [] # if cannonical, derivative function is not needed
+  else
+      lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)  # if non-cannonical, use derivative and autodiff if not specified
+  end
+
+  # Initialize mini-batch and delta structure
+  x_batch,t_batch,w_batch = mini_batch_init(x,t,weights, [1:batch_size], mlp)              
+  D = deltas_init(mlp, batch_size)
+
+  while epoch < maxiter
+    epoch += 1
+
+    fitpoints = sample_epoch(n, batch_size)                                  # Create mini-batch sample points for epoch
+
+    if epoch > 1
+      η .*= learning_rate_factor
     end
 
-    while (!converged && i < maxiter)
-        i += 1
-        x_batch,t_batch = batch(b,x,t)
-        ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd)
-        sumgrad += ∇ .^ 2.       # store sum of squared past gradients
-        Δw = η * ∇ ./ (λ .+ (sumgrad .^ 0.5))   # calculate Δ weights
-        mlp.net = mlp.net .- Δw                 # update weights
+    i = 0
 
-        if i % eval == 0  # recalculate loss every eval number iterations
-            e_old = e_new
-            e_new = loss(prop(mlp,x),t)
-            converged = abs(e_new - e_old) < c # check if converged
-        end
-        if verbose && i % 100 == 0
-            println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
-        end
-    end
-    convgstr = converged ? "converged" : "didn't converge"
-    println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
-    println("* learning rate η = $η")
-    println("* convergence criterion c = $c")
-    mlp.trained=true
-    return mlp
+    while (!converged && i < size(fitpoints,2))
+      i += 1
+
+      x_batch,t_batch,w_batch = minibatchfn(x,t,weights,x_batch,t_batch,w_batch,fitpoints[:,i], mlp)   # Create mini-batch
+
+      ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas,w_batch,gain)
+      sumgrad += ∇ .^ 2.       # store sum of squared past gradients
+      Δw = η * ∇ ./ (λ .+ (sumgrad .^ 0.5))   # calculate Δ weights
+      mlp.net = mlp.net .- Δw                 # update weights
+
+      if i % eval == 0  # recalculate loss every eval number iterations
+          e_old = e_new
+          e_new = loss(prop(mlp,x),t)
+          converged = abs(e_new - e_old) < c # check if converged
+      end
+      if verbose && i % 100 == 0
+          println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
+      end
+  end
+  convgstr = converged ? "converged" : "didn't converge"
+  println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
+  println("* learning rate η = $η")
+  println("* convergence criterion c = $c")
+  mlp.trained=true
+  return mlp
 end
 
 # Train a MLP using RMSProp with Nesterov momentum and adaptive step sizes.
-# mlp.net:  array of neural network layers
-# x:        input data
-# t:        target data
-# η:        learning rate
-# m:        momentum coefficient
-# c:        convergence criterion
-# eval:     how often we evaluate the loss function
-# verbose:  train with printed feedback about the error function
+# mlp.net:        array of neural network layers
+# x:              input data
+# t:              target data
+# batch_size:     samples in mini-batch
+# maxiter:        number of epochs to train for
+# learning_rate:  step size for weight update
+# momentum_rate:  amount of momentum
+# loss:           loss function to minimize
+# eval:           how often we evaluate the loss function
+# verbose:        train with printed feedback about the error function
 function rmsproptrain(mlp::MLNN,
                   x,
                   t;
@@ -327,19 +344,20 @@ function rmsproptrain(mlp::MLNN,
     e_new = loss(prop(mlp,xval),tval)
   end
 
+  # if check if loss function is paired with cannonical output activation function
   if haskey(cannonical,mlp.net[end].a) && cannonical[mlp.net[end].a] == loss
-      lossd = []
+      lossd = [] # if cannonical, derivative function is not needed
   else
-      lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)
+      lossd = haskey(lossderivs,loss) ? lossderivs[loss] : autodiff(loss)  # if non-cannonical, use derivative and autodiff if not specified
   end
 
-  x_batch,t_batch,w_batch = mini_batch_init(x,t,weights, [1:batch_size], mlp)              # Initialize mini-batch
+  x_batch,t_batch,w_batch = mini_batch_init(x,t,weights, [1:batch_size], mlp)  # Initialize mini-batch
   D = deltas_init(mlp, batch_size)
 
   while epoch < maxiter
     epoch += 1
 
-    fitpoints = sample_epoch(n, batch_size)                                  # Create mini-batch sample points for epoch
+    fitpoints = sample_epoch(n, batch_size)   # Create mini-batch sample points for epoch
 
     if epoch > 1
       η .*= learning_rate_factor
@@ -389,7 +407,6 @@ function rmsproptrain(mlp::MLNN,
   println("Training finished in $epoch epochs; average error: $(round((e_new/n),4)).")
   println("* learning rate η = $η")
   println("* momentum coefficient m = $m")
-  #println("* convergence criterion c = $c")
   mlp.trained=true
   return mlp
 end
