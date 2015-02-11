@@ -22,8 +22,6 @@ include("tdmlp.jl")
 
 # training
 include("backprop.jl")
-include("lmtrain.jl")
 include("gradientdescent.jl")
-include("train.jl")
 
 end
