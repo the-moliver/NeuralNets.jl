@@ -11,12 +11,15 @@ Some features:
 
 
 ## Usage
+
+### Multi-Layer Perceptrons
 Multi-layer perceptrons are instantiated by using the `MLP(layer_sizes,act)` constructor  to describe the network topology and initialisation procedure as follows:
 * `layer_sizes::Vector{Int}` is a vector whose first element is the number of input nodes, and the last element is the number of output nodes, intermediary elements are the numbers of hidden nodes per layer
 * `act::Vector{Function}` is the vector of activation functions corresponding to each layer
 
 For example, `MLP([4,8,8,2], [relu,logis,ident])` returns a 3-layer network with 4 input nodes, 2 output nodes, and two hidden layers comprised of 8 nodes each. The first hidden layer uses a `relu` activation function, the second uses `logis`. The output nodes lack any activation function and so we specify them with the `ident` 'function'—but this could just as easily be another `logis` to ensure good convergence behaviour on a 1-of-k target vector like you might use with a classification problem.
 
+### Time-delay Multi-Layer Perceptrons
 Time-delay multi-layer perceptrons are instantiated by using the `TDMLP(layer_sizes, delays, act)` constructor  to describe the network topology and initialisation procedure as follows:
 * `layer_sizes::Vector{Int}` is a vector whose first element is the number of input nodes, and the last element is the number of output nodes, intermediary elements are the numbers of hidden nodes per layer
 * `delays::Vector{Int}` is a vector of the number of time steps used at each layer. When set to all ones, it functions identially to mlp. Any values greater than 1 indicate that past values of the previous layer will be used as input to the next layer.
