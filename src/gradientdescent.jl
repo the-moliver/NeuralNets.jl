@@ -150,6 +150,7 @@ function gdmtrain(mlp::MLNN,
   i = e_old = Δw_old = epoch = 0.
   e_new = loss(prop(mlp,x),t)
   converged::Bool = false
+  gain = mlp.gain
 
   if isempty(weights)
     weights=ones(eltype(t),size(t))  # set weights to 1 if no weights are declared
@@ -247,6 +248,7 @@ function adatrain(mlp::MLNN,
   e_new = loss(prop(mlp,x),t)
   n = size(x,2)
   converged::Bool = false
+  gain = mlp.gain
 
   if isempty(weights)
     weights=ones(eltype(t),size(t))  # set weights to 1 if no weights are declared
