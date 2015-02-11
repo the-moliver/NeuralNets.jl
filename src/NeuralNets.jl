@@ -3,8 +3,6 @@ module NeuralNets
 using Optim
 using ArrayViews
 
-import Optim:levenberg_marquardt
-
 # functions
 export train, gdmtrain, adatrain, prop, rmsproptrain, backprop, errprop, mprop, finite_diff, finite_diff_m, mini_batch!, mini_batch_init, deltas_init, view, reshape_view, flatten_net, unflatten_net!, nansum
 export logis, logisd, logissafe, logissafed, relu, relud, srelu, srelud, nrelu, nrelud, ident, identd, tanhact, tanhactd, expact, expactd, softmaxact, sreluk, srelukd, doprelu, doprelud, dopnrelu, dopnrelud
