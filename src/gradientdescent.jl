@@ -139,6 +139,7 @@ function gdmtrain(mlp::MLNN,
                   eval::Int=10,
                   loss=squared_loss,
                   weights=Array[],
+                  maxnorm::FloatingPoint=0.0,
                   minibatchfn=mini_batch!,
                   verbose::Bool=true,
                   verboseiter::Int=100)
@@ -184,6 +185,11 @@ function gdmtrain(mlp::MLNN,
       ∇,δ = backprop(mlp.net,x_batch,t_batch,lossd,D.deltas,w_batch,gain)
       Δw_new = -η*∇                     # calculate Δ weights
       mlp.net = mlp.net .+ Δw_new       # update weights
+
+      if maxnorm > 0.0
+        maxnormreg!(mlp.net, maxnorm)
+      end
+
       Δw_old = Δw_new .+ m*Δw_old       # keep track of all weight updates
 
       if i % eval == 0  # recalculate loss every eval number iterations
@@ -229,6 +235,7 @@ function adatrain(mlp::MLNN,
                   lambda=1e-6,
                   loss=squared_loss,
                   weights=Array[],
+                  maxnorm::FloatingPoint=0.0,
                   minibatchfn=mini_batch!,
                   eval::Int=10,
                   verbose::Bool=true)
@@ -274,6 +281,10 @@ function adatrain(mlp::MLNN,
       sumgrad += ∇ .^ 2.       # store sum of squared past gradients
       Δw = η * ∇ ./ (λ .+ (sumgrad .^ 0.5))   # calculate Δ weights
       mlp.net = mlp.net .- Δw                 # update weights
+
+      if maxnorm > 0.0
+        maxnormreg!(mlp.net, maxnorm)
+      end
 
       if i % eval == 0  # recalculate loss every eval number iterations
           e_old = e_new
