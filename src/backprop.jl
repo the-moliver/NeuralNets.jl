@@ -10,7 +10,7 @@ function prop(mlp::MLP,x)
 			end
 		end
 	end
-	a = prop(mlp.net,x,tdmlp.gain)
+	a = prop(mlp.net,x,mlp.gain)
     # replace activation functions with originals
 	if mlp.trained
 		for l in mlp.net
