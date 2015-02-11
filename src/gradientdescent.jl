@@ -283,6 +283,7 @@ function adatrain(mlp::MLNN,
       if verbose && i % 100 == 0
           println("i: $i\tLoss=$(round(e_new,6))\tΔLoss=$(round((e_new - e_old),6))\tAvg. Loss=$(round((e_new/n),6))")
       end
+    end
   end
   convgstr = converged ? "converged" : "didn't converge"
   println("Training $convgstr in less than $i iterations; average error: $(round((e_new/n),4)).")
