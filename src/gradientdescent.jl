@@ -126,6 +126,7 @@ end
 # learning_rate:  step size for weight update
 # momentum_rate:  amount of momentum
 # loss:           loss function to minimize
+# maxnorm:        maximum norm of weights to each hidden unit
 # eval:           how often we evaluate the loss function
 # verbose:        train with printed feedback about the error function
 function gdmtrain(mlp::MLNN,
@@ -146,7 +147,7 @@ function gdmtrain(mlp::MLNN,
 
   n = size(x,2)
   η, c, m, b = learning_rate, tol, momentum_rate, batch_size
-  i = e_old = Δw_old = 0
+  i = e_old = Δw_old = epoch = 0.
   e_new = loss(prop(mlp,x),t)
   converged::Bool = false
 
@@ -223,6 +224,7 @@ end
 # tol:            convergence criterion
 # learning_rate:  step size for weight update
 # loss:           loss function to minimize
+# maxnorm:        maximum norm of weights to each hidden unit
 # eval:           how often we evaluate the loss function
 # verbose:        train with printed feedback about the error function
 function adatrain(mlp::MLNN,
@@ -241,7 +243,7 @@ function adatrain(mlp::MLNN,
                   verbose::Bool=true)
 
   η, c, λ, b = learning_rate, tol, lambda, batch_size
-  i = e_old = Δnet = sumgrad = 0.0
+  i = e_old = Δnet = sumgrad = epoch = 0.0
   e_new = loss(prop(mlp,x),t)
   n = size(x,2)
   converged::Bool = false
@@ -313,6 +315,7 @@ end
 # learning_rate:  step size for weight update
 # momentum_rate:  amount of momentum
 # loss:           loss function to minimize
+# maxnorm:        maximum norm of weights to each hidden unit
 # eval:           how often we evaluate the loss function
 # verbose:        train with printed feedback about the error function
 function rmsproptrain(mlp::MLNN,
