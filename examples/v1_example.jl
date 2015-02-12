@@ -3,7 +3,7 @@ using MAT
 
 
 # load data
-data = matread("examples/v1cattest2.mat")
+data = matread(string(homedir(), "/.julia/v0.3/NeuralNets/examples/v1cattest2.mat"))
 
 stim = float32(data["stim"]);
 resp = float32(data["resp"]);
