@@ -18,23 +18,26 @@ trainstim = trainstim ./ sX
 ind = size(trainstim,1)
 outd = size(trainval,1)
 
+do8nrelu(x) = dopnrelu(x,.8)
+do8nrelud(x,idx) = dopnrelud(x,idx,.8)
+merge!(derivs, [do8nrelu   => do8nrelud])
 
-layer_sizes = [ind, 500, 50, 200, outd]
-act   = [nrelu,nrelu,nrelu, softmaxact];
+layer_sizes = [ind, 50, 50, 20, outd]
+act   = [do8nrelu,nrelu,nrelu, softmaxact];
 
 trainstim = convert(Array{Float32}, trainstim)
 trainval = convert(Array{Float32}, trainval)
 
 
 mlp = MLP(layer_sizes, act);
-mlp = rmsproptrain(mlp, trainstim, trainval, learning_rate=.001, learning_rate_factor=.96, maxiter=200, batch_size = 100, loss=xent_loss, maxnorm=1.)
+mlp = rmsproptrain(mlp, trainstim, trainval, learning_rate=.001, learning_rate_factor=.96, maxiter=20, batch_size = 100, loss=xent_loss, maxnorm=1.)
 
-# for ii=1:3
-# mlp.net[ii].a = relu
-# mlp.net[ii].ad = relud
-# end
+for ii=1:3
+mlp.net[ii].a = relu
+mlp.net[ii].ad = relud
+end
 
-# mlp = rmsproptrain(mlp, trainstim, trainval, learning_rate=.001, learning_rate_factor=.9, maxiter=100, batch_size = 100, loss=xent_loss, maxnorm=1.)
+mlp = gdmtrain(mlp, trainstim, trainval, learning_rate=.001, learning_rate_factor=.96, maxiter=10, batch_size = 100, loss=xent_loss, maxnorm=1.)
 
 
 O = prop(mlp, trainstim);
