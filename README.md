@@ -11,12 +11,15 @@ Some features:
 
 
 ## Usage
+
+### Multi-Layer Perceptrons
 Multi-layer perceptrons are instantiated by using the `MLP(layer_sizes,act)` constructor  to describe the network topology and initialisation procedure as follows:
 * `layer_sizes::Vector{Int}` is a vector whose first element is the number of input nodes, and the last element is the number of output nodes, intermediary elements are the numbers of hidden nodes per layer
 * `act::Vector{Function}` is the vector of activation functions corresponding to each layer
 
 For example, `MLP([4,8,8,2], [relu,logis,ident])` returns a 3-layer network with 4 input nodes, 2 output nodes, and two hidden layers comprised of 8 nodes each. The first hidden layer uses a `relu` activation function, the second uses `logis`. The output nodes lack any activation function and so we specify them with the `ident` 'function'—but this could just as easily be another `logis` to ensure good convergence behaviour on a 1-of-k target vector like you might use with a classification problem.
 
+### Time-delay Multi-Layer Perceptrons
 Time-delay multi-layer perceptrons are instantiated by using the `TDMLP(layer_sizes, delays, act)` constructor  to describe the network topology and initialisation procedure as follows:
 * `layer_sizes::Vector{Int}` is a vector whose first element is the number of input nodes, and the last element is the number of output nodes, intermediary elements are the numbers of hidden nodes per layer
 * `delays::Vector{Int}` is a vector of the number of time steps used at each layer. When set to all ones, it functions identially to mlp. Any values greater than 1 indicate that past values of the previous layer will be used as input to the next layer.
@@ -41,12 +44,6 @@ There is 'native' support for the following activation functions. If you define 
 ### Training Methods
 Once the MLP type is constructed we train it using one of several provided training functions.
 
-* `train(nn, trainx, valx, traint, valt)`: This training method relies on calling the external [Optim.jl](https://github.com/JuliaOpt/Optim.jl) package. By default it uses the `gradient_descent` algorithm. However, by setting the `train_method` parameter, the following algorithms can also be selected: `levenberg_marquardt`, `momentum_gradient_descent`, or `nelder_mead`. The function accepts two data sets: the training data set (inputs and outputs given with `trainx` and `traint`) and the validation set (`valx`, `valt`). Input data must be a matrix with each data point occuring as a column of the matrix. Optional parameters include:
-    * `maxiter` (default: 100): Number of iterations before giving up.
-    * `tol` (default: 1e-5): Convergence threshold. Does not affect `levenberg_marquard`.
-    * `ep_iterl` (default: 5): Performance is evaluated on the validation set every `ep_iter` iterations. A smaller number gives slightly better convergence but each iteration takes a slightly longer time.
-    * `verbose` (default: true): Whether or not to print out information on the training state of the network.
-
 * `gdmtrain(nn, x, t)`: This is a natively-implemented gradient descent training algorithm with Nesterov momentum. Optional parameters include:
     * `batch_size` (default: n): Randomly selected subset of `x` to use when training extremely large data sets. Use this feature for 'stochastic' gradient descent.
     * `maxiter` (default: 1000): Number of iterations before giving up.
@@ -64,8 +61,4 @@ Once the MLP type is constructed we train it using one of several provided train
     * `momentum_rate` (default: .6): Amount of momentum to apply. Try 0 for no momentum.
     * `eval` (default: 10): The network is evaluated for convergence every `eval` iterations. A smaller number gives slightly better convergence but each iteration takes a slightly longer time.
     * `verbose` (default: true): Whether or not to print out information on the training state of the network.
-* `adatrain`
-* `lmtrain`
 
-
-## Working Example

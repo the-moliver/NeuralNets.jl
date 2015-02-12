@@ -36,8 +36,8 @@ end
  	tt= size(x,3)-size(d,3)+1
   	gw = zeros(T, size(d,1), size(x,1), tt)
   	for ti=1:tt, ti2 = 1:size(d,3)
-    		# gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
-		Base.LinAlg.BLAS.gemm!('N', 'T', one(T), d[:,:,ti2], x[:,:,ti+ti2-1], one(T), gw[:,:,ti])
+		# gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
+		Base.LinAlg.BLAS.gemm!('N', 'T', one(T), view(d,:,:,ti2), view(x,:,:,ti+ti2-1), one(T), view(gw,:,:,ti))
   	end
   	gw
 end
