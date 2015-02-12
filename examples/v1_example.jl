@@ -43,7 +43,7 @@ merge!(derivs, [do8nrelu   => do8nrelud])
 # create vector of activations at each layer
 act   = [do8nrelu,nrelu,srelu10];
 
-# create vector of 
+# create vector of time delays to consider in each layer
 delays = [1, 12, 1];
 
 # initialize time-delay multi-layer perceptron, without output gain = .1
