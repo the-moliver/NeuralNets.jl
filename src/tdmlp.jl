@@ -13,21 +13,21 @@ type TDMLP <: MLNN
     net::Vector{TDNNLayer}
     dims::Vector{(Int,Int,Int)} # topology of net
     buf::AbstractVector      	# in-place data store
-    offs::Vector{Int}    		# indices into in-place store
-    delays::Int    				# total number of lags needed for forward pass
-    trained::Bool 				# training state
-    gain::FloatingPoint			# gain before output activation
+    offs::Vector{Int}    	# indices into in-place store
+    delays::Int    		# total number of lags needed for forward pass
+    trained::Bool 		# training state
+    gain::FloatingPoint		# gain before output activation
 end
 
 
 # In all operations between two TDNNLayers, the activations functions are taken from the first TDNNLayer
 
-
+# function for multiplication with time delays
 *{T}(l::TDNNLayer, x::Array{T,3}) = begin
 	nd = size(x,3)-size(l.w,3)+1
 	z = zeros(T, size(l.w,1), size(x,2), nd);
 	for ti = 1:nd, ti2 = 1:size(l.w,3)
-      Base.LinAlg.BLAS.gemm!('N', 'N', one(T), view(l.w,:,:,ti2), view(x,:,:,ti+ti2-1), one(T), view(z,:,:,ti))
+		Base.LinAlg.BLAS.gemm!('N', 'N', one(T), view(l.w,:,:,ti2), view(x,:,:,ti+ti2-1), one(T), view(z,:,:,ti))
   	end
   	z .+= (l.b + 0.) # convert to standard array so broadcasting works
 end
@@ -36,7 +36,6 @@ end
  	tt= size(x,3)-size(d,3)+1
   	gw = zeros(T, size(d,1), size(x,1), tt)
   	for ti=1:tt, ti2 = 1:size(d,3)
-		# gw[:,:,ti] += d[:,:,ti2]*x[:,:,ti+ti2-1]';
 		Base.LinAlg.BLAS.gemm!('N', 'T', one(T), view(d,:,:,ti2), view(x,:,:,ti+ti2-1), one(T), view(gw,:,:,ti))
   	end
   	gw
@@ -58,69 +57,76 @@ end
 
 
 .*(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = l.w .* c
-											        l.b = l.b .* c
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = l.w .* c
+			l.b = l.b .* c
+		end
+		net2
+	end
 .*(c::FloatingPoint, net::Array{TDNNLayer})  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = c.* l.w
-											        l.b = c.*l.b
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = c.* l.w
+			l.b = c.*l.b
+		end
+		net2
+	end
+	
 ./(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = l.w ./ c
-											        l.b = l.b ./ c
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = l.w ./ c
+			l.b = l.b ./ c
+		end
+		net2
+	end
+	
 ./(c::FloatingPoint, net::Array{TDNNLayer})  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = c./ l.w
-											        l.b = c./l.b
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = c./ l.w
+			l.b = c./l.b
+		end
+		net2
+	end
+	
 .+(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = l.w .+ c
-											        l.b = l.b .+ c
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = l.w .+ c
+			l.b = l.b .+ c
+		end
+		net2
+	end
+	
 .+(c::FloatingPoint,net::Array{TDNNLayer})  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = l.w .+ c
-											        l.b = l.b .+ c
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = l.w .+ c
+			l.b = l.b .+ c
+		end
+		net2
+	end
+	
 .-(net::Array{TDNNLayer}, c::FloatingPoint)  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = l.w .- c
-											        l.b = l.b .- c
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = l.w .- c
+			l.b = l.b .- c
+		end
+		net2
+	end
+	
 .-(c::FloatingPoint, net::Array{TDNNLayer})  =  begin
-												net2=deepcopy(net)
-												for l in net2
-											    	l.w = c .- l.w
-											        l.b = c .- l.b
-											    end
-											    net2
-											end
+		net2=deepcopy(net)
+		for l in net2
+			l.w = c .- l.w
+			l.b = c .- l.b
+		end
+		net2
+	end
+	
 import Base.sign
 sign(l::TDNNLayer) = TDNNLayer(sign(l.w), sign(l.b), l.a, l.ad)
 
